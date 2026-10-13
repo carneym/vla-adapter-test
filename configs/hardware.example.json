@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "status": "unconfigured",
+  "control_host": {
+    "platform": "macos-apple-silicon",
+    "machine": "mac-mini-m4",
+    "memory_gb": 16,
+    "selection_status": "proposed"
+  },
+  "leader": {
+    "type": "so101_leader",
+    "id": "leader",
+    "port": null,
+    "device_identity": null,
+    "calibration_path": null
+  },
+  "follower": {
+    "type": "so101_follower",
+    "id": "follower",
+    "port": null,
+    "device_identity": null,
+    "calibration_path": null
+  },
+  "cameras": [
+    {
+      "name": "overhead",
+      "description": "4K camera",
+      "device": null,
+      "capture_width": null,
+      "capture_height": null,
+      "fps": null
+    },
+    {
+      "name": "wrist",
+      "device": null,
+      "capture_width": null,
+      "capture_height": null,
+      "fps": null
+    }
+  ],
+  "training": {
+    "provider": "modal",
+    "gpu": null,
+    "budget_limit": null
+  },
+  "inference": {
+    "backend": null,
+    "control_rate_hz": null
+  }
+}

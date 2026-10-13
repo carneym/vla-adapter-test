@@ -19,12 +19,14 @@ Repository: [carneym/vla-adapter-test](https://github.com/carneym/vla-adapter-te
 
 | Component | Responsibility |
 | --- | --- |
-| M2 MacBook or M4 Mac mini | Setup, calibration, camera capture, leader/follower teleoperation, recording, and local motor control |
+| M4 Mac mini (16 GB), preferred; M2 MacBook Air (8 GB), alternative | Setup, calibration, camera capture, leader/follower teleoperation, recording, and local motor control |
 | Modal GPU | VLA-Adapter training, persistent datasets and checkpoints |
 | Inference host | To be selected after measuring Apple Silicon compatibility and end-to-end latency |
 | Cameras | One wrist camera and one overhead 4K camera; modes and frame rates to be measured |
 
 Keep the robot interface separate from the CUDA training environment. Use LeRobot's SO-101 hardware support, retain its calibration, and add an explicit six-channel SO-101 adapter to VLA-Adapter.
+
+Both arms are assembled and already moving through software. Begin by inspecting the working setup and preserving its calibration; motor provisioning should normally be skipped.
 
 ## Start here
 
