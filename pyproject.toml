@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "vla-adapter-so101"
+version = "0.1.0"
+description = "Portable LeRobot setup for the SO-101 leader and follower"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "lerobot[core_scripts,feetech]==0.6.1",
+  "torch==2.10.0",
+  "torchvision==0.25.0",
+  "torchcodec==0.10.0",
+]
+
+[project.scripts]
+so101 = "so101_setup.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/so101_setup"]
+
+[tool.uv]
+# This is the Mac control environment. Modal/CUDA gets a separate environment.
+environments = ["sys_platform == 'darwin' and platform_machine == 'arm64'"]

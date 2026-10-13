@@ -3,9 +3,9 @@
   "status": "unconfigured",
   "control_host": {
     "platform": "macos-apple-silicon",
-    "machine": "mac-mini-m4",
-    "memory_gb": 16,
-    "selection_status": "proposed"
+    "machine": "macbook-air-m2",
+    "memory_gb": 8,
+    "selection_status": "selected"
   },
   "leader": {
     "type": "so101_leader",

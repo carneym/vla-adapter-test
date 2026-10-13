@@ -5,10 +5,15 @@ __pycache__/
 venv/
 .pytest_cache/
 .ruff_cache/
+.cache/
+.python/
+*.egg-info/
+dist/
+build/
 .env
 .env.*
 !.env.example
-configs/*.local.json
+configs/*.local.json*
 calibration/
 data/
 datasets/

@@ -11,7 +11,7 @@ import sys
 
 def inventory():
     packages = {}
-    for name in ("lerobot", "torch", "modal", "opencv-python", "pyserial"):
+    for name in ("lerobot", "torch", "modal", "opencv-python-headless", "pyserial"):
         try:
             packages[name] = importlib.metadata.version(name)
         except importlib.metadata.PackageNotFoundError:
@@ -27,7 +27,7 @@ def inventory():
             for name in ("git", "uv", "modal", "lerobot-find-port", "lerobot-calibrate")
         },
         "packages_in_this_python": packages,
-        "next_step": "Complete C0 in docs/PLAN.md; select and pin robot dependencies before installing.",
+        "next_step": "Run bash scripts/setup.sh macbook, then uv run --locked so101 doctor --check (see docs/SETUP.md).",
     }
 
 

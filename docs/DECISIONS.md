@@ -22,6 +22,7 @@ Updated 2026-10-13.
 - The arms are already controlled with LeRobot; reuse the working setup and calibration.
 - Initial Modal budget: USD 20 total, not USD 20 per job.
 - Offline operation is not required. Online inference is an option, subject to measured latency and local stopping behavior.
+- Start on the M2 MacBook Air (8 GB); make the repository portable to the Mac mini.
 
 ## Proposed defaults
 
@@ -32,18 +33,21 @@ Updated 2026-10-13.
 - Use both camera views with consistent preprocessing; measure capture modes and throughput.
 - Start with raise-arm; evaluate eight tasks individually before a combined policy.
 - Use guided prompts inside the command-line setup.
-- Prefer the 16 GB Mac mini as the regular controller and inference test host.
+- Keep the 16 GB Mac mini as a later option; the MacBook is the initial controller.
 - Inspect the existing working robot environment and preserve its calibration before making changes.
 
 ## Awaiting answers
 
 1. Existing LeRobot version/environment, calibration location, arm vendor/version, controller and power supply details.
 2. Camera models, USB connectivity, modes, and existing mounts.
-3. Which Mac will remain attached to the robot (Mac mini recommended).
-4. Exact object/task details listed in [TASKS.md](TASKS.md), particularly pickup destination/hold behavior, cable, cup load, tissue presentation position, and exact beside-box put-away area.
-5. Desired final success rate, object/scene variation, and whether human handoff is in scope.
+3. Exact object/task details listed in [TASKS.md](TASKS.md), particularly pickup destination/hold behavior, cable, cup load, tissue presentation position, and exact beside-box put-away area.
+4. Desired final success rate, object/scene variation, and whether human handoff is in scope.
 
 These questions do not block repository planning. Hardware-specific implementation and training settings should use the answers rather than guessed device configurations.
+
+## Implemented environment
+
+The control environment pins LeRobot 0.6.1 with hardware/recording extras and Feetech support, Python 3.12, and the compatible PyTorch/torchvision versions in `uv.lock`. It is isolated from other LeRobot installations. `so101` helpers manage ignored local configuration and explicitly selected calibration copies. The tested video decoding path is PyAV; no system FFmpeg install is required for that path. See [SETUP.md](SETUP.md).
 
 ## Repository destination
 

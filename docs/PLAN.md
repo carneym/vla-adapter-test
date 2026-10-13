@@ -1,6 +1,6 @@
 # Implementation and test plan
 
-Draft dated 2026-10-13. Items below are planned, not implemented. Targets are initial engineering acceptance criteria, to be revised after hardware measurements.
+Updated 2026-10-13. The portable Mac LeRobot environment and setup helpers are implemented; see [SETUP.md](SETUP.md). Hardware checks and the model pipeline below remain unverified/planned. Targets are initial engineering acceptance criteria, to be revised after hardware measurements.
 
 ## Architecture
 
@@ -22,19 +22,19 @@ The leader is used for teaching. At inference, observations come from the follow
 
 Keep two independently pinned environments: an Apple Silicon LeRobot environment and a Linux/CUDA VLA-Adapter image on Modal. Validate concrete revisions before locking them. Do not combine the latest packages without a compatibility test. Preserve upstream attribution; use a pinned upstream dependency and a small, reviewable adaptation layer rather than rewriting the model.
 
-The available hosts are an M2 MacBook Air with 8 GB and an M4 Mac mini with 16 GB. Prefer the Mac mini for the two-camera controller and inference experiment because it has more memory; neither host's VLA-Adapter inference performance is established. Both arms are assembled and already moving through LeRobot, so inspect the existing LeRobot environment and calibration before installing or changing anything. Offline operation is not required; remote inference remains an option after measuring latency and stopping behavior.
+The initial host is the M2 MacBook Air with 8 GB; the M4 Mac mini with 16 GB is a later option. Neither host's VLA-Adapter inference performance is established. Both arms are assembled and already moving through LeRobot. The repo now provides an isolated pinned environment and a helper to import the chosen existing calibration without modifying the original. Offline operation is not required; remote inference remains an option after measuring latency and stopping behavior.
 
 ## Calibration and operation design
 
 The interface will be command-line tools with short guided prompts and persistent settings. Raise-arm is the first learned task. Its sequence is **find arms → identify cameras → calibrate → verify movement → ready**. Reuse LeRobot's per-arm calibration. Daily startup should validate identity, calibration compatibility, camera health, and the start pose without requiring repeated range sweeps. Detailed behavior is in [CALIBRATION.md](CALIBRATION.md).
 
-Proposed commands for the eventual implementation are `doctor`, `setup`, `teleop`, `record`, `train`, and `evaluate`. Only the standalone `scripts/doctor.py` inventory exists today.
+Available today: `scripts/setup.sh`, `so101 init`, `doctor`, `ports`, `calibrations`, `calibration-import`, `configure`, and `teleop-command` (prints an upstream command; does not execute it). LeRobot's upstream control/recording tools are installed. Project-specific recording, training, and evaluation orchestration remain planned.
 
 ## C0 — Confirm the setup
 
 Deliver: hardware inventory, task definitions, operator interface choice, and compute plan.
 
-Test: run `python3 scripts/doctor.py` using the existing LeRobot environment; identify its version and calibration, camera models and mounts, and Modal availability. Raise-arm is the agreed initial task. The initial Modal budget is USD 20 total; offline operation is not required.
+Test: run `uv run --locked so101 doctor --check`; identify the existing working calibration pair, camera models and mounts, and Modal availability. Raise-arm is the agreed initial task. The initial Modal budget is USD 20 total; offline operation is not required.
 
 Pass: all C1 prerequisites are identified, and missing items have an explicit next action. No purchases or GPU runs are part of this gate.
 

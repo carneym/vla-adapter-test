@@ -1,6 +1,6 @@
 # Simple calibration workflow
 
-Command-line design specification; the guided command-line setup is not implemented yet. The aim is one guided setup per arm and a short readiness check at each session.
+Calibration design specification. The portable setup and explicit calibration-import helper are implemented in [SETUP.md](SETUP.md); guided physical verification and any recalibration remain hardware checkpoints. The aim is one setup per arm and a short readiness check at each session.
 
 ## First setup
 
