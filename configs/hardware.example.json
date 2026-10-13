@@ -41,10 +41,14 @@
   "training": {
     "provider": "modal",
     "gpu": null,
-    "budget_limit": null
+    "budget_limit": 20,
+    "budget_currency": "USD",
+    "budget_scope": "total_initial_modal_experiment",
+    "budget_enforcement": "not_implemented"
   },
   "inference": {
     "backend": null,
-    "control_rate_hz": null
+    "control_rate_hz": null,
+    "offline_required": false
   }
 }

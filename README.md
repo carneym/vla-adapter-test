@@ -20,13 +20,13 @@ Repository: [carneym/vla-adapter-test](https://github.com/carneym/vla-adapter-te
 | Component | Responsibility |
 | --- | --- |
 | M4 Mac mini (16 GB), preferred; M2 MacBook Air (8 GB), alternative | Setup, calibration, camera capture, leader/follower teleoperation, recording, and local motor control |
-| Modal GPU | VLA-Adapter training, persistent datasets and checkpoints |
-| Inference host | To be selected after measuring Apple Silicon compatibility and end-to-end latency |
+| Modal GPU | VLA-Adapter training, with a USD 20 total initial experiment budget |
+| Inference host | Local or online; select after measuring compatibility, latency, and cost. Offline operation is not required |
 | Cameras | One wrist camera and one overhead 4K camera; modes and frame rates to be measured |
 
 Keep the robot interface separate from the CUDA training environment. Use LeRobot's SO-101 hardware support, retain its calibration, and add an explicit six-channel SO-101 adapter to VLA-Adapter.
 
-Both arms are assembled and already moving through software. Begin by inspecting the working setup and preserving its calibration; motor provisioning should normally be skipped.
+Both arms are assembled and already moving through LeRobot. Begin by inspecting that working setup and preserving its calibration; motor provisioning should normally be skipped. Run the inventory from the existing LeRobot environment so it reports the packages used by the arms.
 
 ## Start here
 
@@ -47,7 +47,7 @@ The inventory does not open serial ports, turn on motors, access cameras, upload
 | --- | --- |
 | C0 | Hardware/compute inventory and task definitions |
 | C1 | Detect both arms and preview cameras |
-| C2 | Calibrate once, reconnect, and verify leader/follower movement |
+| C2 | Validate saved calibration, reconnect, and verify leader/follower movement; recalibrate only if needed |
 | C3 | Record and inspect five demonstrations |
 | C4 | Train a tiny VLA-Adapter run on Modal and verify the six-channel data contract |
 | C5 | Measure inference and prove stopping behavior without sending policy actions to the arm |
@@ -70,4 +70,4 @@ scripts/doctor.py               Read-only local inventory, standard library only
 reports/checkpoint-template.md  Evidence template for each completed gate
 ```
 
-Datasets, camera recordings, model weights, local hardware settings, and credentials stay out of Git. Dataset sharing and cloud training budget will be configured explicitly. Licensing for this project's original code is undecided; upstream components retain their own licenses.
+Datasets, camera recordings, model weights, local hardware settings, and credentials stay out of Git. The USD 20 budget is recorded but spending controls are not yet implemented; no paid jobs have run. Dataset sharing will be configured explicitly. Licensing for this project's original code is undecided; upstream components retain their own licenses.

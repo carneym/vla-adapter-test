@@ -19,6 +19,9 @@ Updated 2026-10-13.
 - Both arms are assembled and already moving through software.
 - The M2 MacBook Air has 8 GB RAM; the M4 Mac mini has 16 GB RAM.
 - Put the tissue down beside the box and release it. Release is permitted; exact destinations for other pickups remain open.
+- The arms are already controlled with LeRobot; reuse the working setup and calibration.
+- Initial Modal budget: USD 20 total, not USD 20 per job.
+- Offline operation is not required. Online inference is an option, subject to measured latency and local stopping behavior.
 
 ## Proposed defaults
 
@@ -34,12 +37,11 @@ Updated 2026-10-13.
 
 ## Awaiting answers
 
-1. Software/version currently moving the arms, calibration location, arm vendor/version, controller and power supply details.
+1. Existing LeRobot version/environment, calibration location, arm vendor/version, controller and power supply details.
 2. Camera models, USB connectivity, modes, and existing mounts.
 3. Which Mac will remain attached to the robot (Mac mini recommended).
 4. Exact object/task details listed in [TASKS.md](TASKS.md), particularly pickup destination/hold behavior, cable, cup load, tissue presentation position, and exact beside-box put-away area.
-5. Modal budget for smoke training and full runs; whether remote inference is acceptable if local inference is unsuitable.
-6. Desired final success rate, object/scene variation, and whether human handoff is in scope.
+5. Desired final success rate, object/scene variation, and whether human handoff is in scope.
 
 These questions do not block repository planning. Hardware-specific implementation and training settings should use the answers rather than guessed device configurations.
 

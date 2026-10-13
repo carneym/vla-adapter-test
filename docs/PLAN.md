@@ -22,7 +22,7 @@ The leader is used for teaching. At inference, observations come from the follow
 
 Keep two independently pinned environments: an Apple Silicon LeRobot environment and a Linux/CUDA VLA-Adapter image on Modal. Validate concrete revisions before locking them. Do not combine the latest packages without a compatibility test. Preserve upstream attribution; use a pinned upstream dependency and a small, reviewable adaptation layer rather than rewriting the model.
 
-The available hosts are an M2 MacBook Air with 8 GB and an M4 Mac mini with 16 GB. Prefer the Mac mini for the two-camera controller and inference experiment because it has more memory; neither host's VLA-Adapter inference performance is established. Both arms are assembled and already moving in software, so inspect the existing working environment and calibration before installing or changing anything.
+The available hosts are an M2 MacBook Air with 8 GB and an M4 Mac mini with 16 GB. Prefer the Mac mini for the two-camera controller and inference experiment because it has more memory; neither host's VLA-Adapter inference performance is established. Both arms are assembled and already moving through LeRobot, so inspect the existing LeRobot environment and calibration before installing or changing anything. Offline operation is not required; remote inference remains an option after measuring latency and stopping behavior.
 
 ## Calibration and operation design
 
@@ -34,13 +34,13 @@ Proposed commands for the eventual implementation are `doctor`, `setup`, `teleop
 
 Deliver: hardware inventory, task definitions, operator interface choice, and compute plan.
 
-Test: run `python3 scripts/doctor.py`; identify the software currently moving the assembled arms and its calibration, camera models and mounts, and Modal availability. Raise-arm is the agreed initial task. Decide the training spend limit and offline requirement before remote runtime decisions.
+Test: run `python3 scripts/doctor.py` using the existing LeRobot environment; identify its version and calibration, camera models and mounts, and Modal availability. Raise-arm is the agreed initial task. The initial Modal budget is USD 20 total; offline operation is not required.
 
 Pass: all C1 prerequisites are identified, and missing items have an explicit next action. No purchases or GPU runs are part of this gate.
 
 ## C1 — Discover hardware and cameras
 
-Deliver: isolated local environment, a pinned LeRobot revision, persistent leader/follower identity, camera preview, and one local configuration file.
+Deliver: documented existing LeRobot environment and pinned revision, persistent leader/follower identity, camera preview, and one local configuration file. Preserve the working environment; use a separate environment if compatibility changes are needed. Use the overhead and wrist cameras with consistent preprocessing, choosing capture modes from measured throughput rather than the overhead camera's maximum 4K resolution.
 
 Test: connect each arm independently to label its port; reconnect both; confirm the labels still identify the right devices. Capture 60 seconds from each camera and inspect visibility, frame rate, and timestamps. Keep motor movement disabled during discovery.
 
@@ -50,7 +50,7 @@ Pass: both arms are uniquely identified; configured cameras maintain the chosen 
 
 Deliver: guided official calibration for each arm, backups with metadata, startup checks, and a supervised teleoperation mode.
 
-Test: operator moves each arm through calibration; verify several corresponding poses at low speed in a clear workspace. Run two minutes of supervised teleoperation; exercise the local stop and power-disconnect procedure. Reconnect without recalibrating and repeat pose checks.
+Test: back up and validate the existing calibration, running the manual calibration procedure only if it is missing, incompatible, or fails verification. Verify several corresponding poses at low speed in a clear workspace. Run two minutes of supervised teleoperation; exercise the local stop and power-disconnect procedure. Reconnect without recalibrating and repeat pose checks.
 
 Pass: all six channels have the right identity/direction; leader/follower tracking is consistent; no unexpected movement at startup; saved calibration works after reconnection. Record measured error, joint units, and the accepted threshold. Do not invent generic joint limits from normalized values.
 
@@ -80,15 +80,23 @@ Upstream currently distinguishes LIBERO, CALVIN, BRIDGE, and ALOHA and defaults 
 
 Test: round-trip one recorded episode through conversion; inspect image orientation and action alignment; test malformed dimensions/units; run one forward/backward pass on Modal. Overfit 2–5 training episodes to expose pipeline errors, save, and resume. The tiny overfit is a software test, not evidence of generalization.
 
-Pass: finite losses/gradients, finite six-channel outputs, reversible normalization within numerical tolerance, a reproducible configuration, and a resumable checkpoint. Set an initial loss reduction target before the run and inspect predicted trajectories. A10 or L4 is a candidate first GPU; choose only after image compatibility and memory profiling, with a user-set cost/runtime cap.
+Pass: finite losses/gradients, finite six-channel outputs, reversible normalization within numerical tolerance, a reproducible configuration, and a resumable checkpoint. Set an initial loss reduction target before the run and inspect predicted trajectories. A10 or L4 is a candidate first GPU; choose only after image compatibility and memory profiling, within the USD 20 initial Modal budget.
 
 Use separate Modal storage locations for immutable raw data, converted dataset versions, base weights, and run outputs. Commit checkpoints and run metadata to persistent storage and test recovery. Record wall time, peak GPU memory, and cost before expanding a job. No automatic full training run after smoke-test success.
+
+### Initial Modal budget
+
+Treat USD 20 as the shared ceiling for the initial experiment, not a per-run allowance or a promise to train all eight tasks. Prioritize the integration smoke test and the first raise-arm policy. Track actual charges and reserve room for CPU, storage, and any remote inference tests as well as GPU time.
+
+Before launching, verify current resource rates and remaining spend, set finite job timeouts and bounded retries, and reserve a margin for costs that arrive after a job ends. Use the small smoke run to estimate the next run; do not launch a job whose conservative estimate exceeds the remaining allowance. Save and stop before the allowance is exhausted. Additional spend requires a new budget from the user; ongoing inference is not an open-ended commitment.
+
+The example configuration records the budget only. Cost tracking and enforcement must be implemented and verified before cloud execution; no paid Modal work has run yet.
 
 ## C5 — Inference feasibility and control checks
 
 Deliver: a shadow inference mode that reads recorded/live observations and logs proposed actions without moving the follower, plus a local command validator and watchdog.
 
-Test: benchmark Apple Silicon inference after replacing CUDA-only code where feasible; record numerical consistency with CUDA, memory, and p50/p95/p99 end-to-end latency. If it is unsuitable, evaluate remote Modal inference separately with warm/cold starts, timestamped requests, and network-drop tests. Training on Modal does not settle the inference decision.
+Test: benchmark Apple Silicon inference after replacing CUDA-only code where feasible; record numerical consistency with CUDA, memory, and p50/p95/p99 end-to-end latency. If it is unsuitable, evaluate remote Modal inference separately with warm/cold starts, timestamped requests, and network-drop tests. Internet access is available as a design assumption, but remote inference must pass these tests and stay within the remaining initial budget. Training on Modal does not settle the inference decision.
 
 Test rejection of NaNs, wrong channel counts, incompatible normalization, joint-limit violations, stale images/responses, out-of-order chunks, and server loss. Bound per-step changes and velocity using measured physical limits. The local watchdog must invalidate queued commands and enter the tested stop behavior without waiting on the policy/network.
 
