@@ -70,7 +70,7 @@ Pass: all accepted episodes have usable views, monotonic timestamps, matching fr
 
 ## C4 — SO-101 model adapter and Modal smoke training
 
-Separate local baseline evidence: a [50-step ACT experiment](../reports/2026-10-14-act-smoke.md) ran on the MacBook using the five LeLab test episodes. Model reload and offline prediction passed; optimizer checkpoint saving failed due to disk exhaustion. This does not complete the VLA-Adapter converter, Modal training, or physical policy evaluation checkpoints below.
+Separate local baseline evidence: a [50-step ACT experiment](../reports/2026-10-14-act-smoke.md#successful-checkpoint-rerun) ran on the MacBook using the five LeLab test episodes. The rerun exited cleanly and saved a complete checkpoint; model, optimizer, RNG, step restoration, and offline prediction checks passed. This does not complete the VLA-Adapter converter, Modal training, or physical policy evaluation checkpoints below.
 
 Deliver: a validated converter/loader, explicit embodiment configuration, reproducible Modal image, persistent storage, bounded training job, and model save/resume.
 

@@ -153,7 +153,7 @@ For the initial test, the dataset ID is `local/raise-arm-c3_20261014_175556`. If
 
 Free several GB before starting (aim for at least 5 GB on this 8 GB Mac, including room for swap). A stock ACT policy is about 197 MiB, and its optimizer state needs roughly another 394 MiB. Jobs are saved by LeLab under `~/.cache/huggingface/lerobot/outputs/train/<job-id>/`, outside the repository. The model, configuration, and normalization files are in `run/checkpoints/<step>/pretrained_model/`; exact training resume also requires the complete `training_state/` directory. Transfer these privately if needed on another Mac.
 
-The [first local ACT test](../reports/2026-10-14-act-smoke.md) completed 50 updates and saved a model that passed offline reload/prediction checks. Disk exhaustion interrupted the optimizer save, so that job is correctly marked failed and is **not resumable**. Fifty updates on five demonstrations establish that the training path works; they do not establish a reliable raise-arm policy. Keep **Run inference** unused until a separate supervised robot evaluation is prepared.
+The [local ACT rerun](../reports/2026-10-14-act-smoke.md#successful-checkpoint-rerun) completed 50 updates, exited cleanly, and saved a complete checkpoint. Model, optimizer, RNG, and step restoration passed, plus offline prediction checks. Use the successful job ending `18-50-52`; the earlier job ending `18-26-58` has incomplete optimizer state from disk exhaustion. Fifty updates on five demonstrations establish that the training path works; they do not establish a reliable raise-arm policy. Keep **Run inference** unused until a separate supervised robot evaluation is prepared.
 
 ## Move to the other Mac
 
