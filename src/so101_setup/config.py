@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 
 JOINTS = ("shoulder_pan", "shoulder_lift", "elbow_flex", "wrist_flex", "wrist_roll", "gripper")
+CAMERA_WARMUP_S = 5
 
 
 def port_identity(port):

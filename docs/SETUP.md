@@ -110,7 +110,7 @@ Press **Ctrl+C** in the terminal running teleoperation to stop command streaming
 
 Pass: after a supervised test, both arms correspond correctly and both views are usable. The generated command is upstream teleoperation, not the planned autonomous controller/watchdog. The full C2 hardware checks in [PLAN.md](PLAN.md) still apply.
 
-For the next hardware test, see [First raise-arm recording](RECORDING.md). `uv run --locked so101 record-command` prints a command for one local 15-second episode using both cameras and the saved 5° relative target cap. It does not start recording or motor movement by itself.
+For the next hardware test, see [First raise-arm recording](RECORDING.md). `uv run --locked so101 record-test` starts one local 15-second episode using both cameras and the saved 5° relative target cap after a 15-second setup countdown. Every attempt gets a fresh dataset folder; camera startup uses a five-second warmup allowance. Add `--setup-seconds 30` for more setup time. Unlike `record-command`, this command actually enables teleoperation and records; `--dry-run` only prints the launch plan.
 
 ## Move to the other Mac
 

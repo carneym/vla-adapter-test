@@ -7,7 +7,7 @@ import threading
 import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-from .config import load_config
+from .config import CAMERA_WARMUP_S, load_config
 
 
 PAGE = """<!doctype html>
@@ -54,7 +54,7 @@ def camera_preview(root, name="overhead", duration=1800):
 
     camera = OpenCVCamera(OpenCVCameraConfig(
         index_or_path=settings["device"], width=settings["capture_width"],
-        height=settings["capture_height"], fps=settings["fps"], warmup_s=2,
+        height=settings["capture_height"], fps=settings["fps"], warmup_s=CAMERA_WARMUP_S,
     ))
     stopped = threading.Event()
     prefix = "/" + secrets.token_urlsafe(24) + "/"

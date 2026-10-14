@@ -1,4 +1,4 @@
-"""Repository-local LeRobot setup. No subcommand starts motor movement."""
+"""Repository-local LeRobot setup. record-test explicitly starts teleoperation and recording."""
 
 import argparse
 import json
@@ -37,6 +37,9 @@ def main(argv=None):
     command.add_argument("--without-cameras", action="store_true")
     recording = commands.add_parser("record-command", help="Print one local 15-second raise-arm recording command; never execute it")
     recording.add_argument("--session", help="New dataset folder name; defaults to a UTC timestamp")
+    start_recording = commands.add_parser("record-test", help="Start one local raise-arm recording with a setup countdown and fresh folder")
+    start_recording.add_argument("--setup-seconds", type=int, default=15)
+    start_recording.add_argument("--dry-run", action="store_true", help="Show the launch command without countdown or hardware access")
     args = parser.parse_args(argv)
     try:
         root = project_root()
@@ -91,6 +94,9 @@ def main(argv=None):
             print("Printed only. Stop camera previews and other arm-control processes before running it. "
                   "This enables teleoperation and records one local 15-second test episode. "
                   "Keep the test dataset out of training until reviewed; quitting can save a partial episode.", file=sys.stderr)
+        elif args.command == "record-test":
+            from .recording import record_test
+            record_test(root, load_config(root), args.setup_seconds, args.dry_run)
         return 0
     except (ValueError, OSError, KeyError, TypeError, RuntimeError) as error:
         print(f"Error: {error}", file=sys.stderr)

@@ -24,6 +24,7 @@ class LeRobotIntegrationTests(unittest.TestCase):
         args = shlex.split(teleop_command(fixture.root, load_config(fixture.root)))[4:]
         config = draccus.parse(config_class=TeleoperateConfig, args=args)
         self.assertEqual(set(config.robot.cameras), {"overhead", "wrist"})
+        self.assertTrue(all(camera.warmup_s == 5 for camera in config.robot.cameras.values()))
         self.assertEqual(config.fps, 30)
         self.assertEqual(config.robot.max_relative_target, 5.0)
         self.assertFalse(config.robot.disable_torque_on_disconnect)
@@ -50,6 +51,7 @@ class LeRobotIntegrationTests(unittest.TestCase):
         self.assertFalse(config.robot.disable_torque_on_disconnect)
         self.assertTrue(config.robot.use_degrees and config.teleop.use_degrees)
         self.assertEqual(config.dataset.num_episodes, 1)
+        self.assertTrue(all(camera.warmup_s == 5 for camera in config.robot.cameras.values()))
         self.assertEqual(config.dataset.episode_time_s, 15)
         self.assertEqual(config.dataset.fps, 30)
         self.assertEqual(config.dataset.single_task, "Raise your arm.")

@@ -28,7 +28,7 @@ The initial host is the M2 MacBook Air with 8 GB; the M4 Mac mini with 16 GB is 
 
 The interface will be command-line tools with short guided prompts and persistent settings. Raise-arm is the first learned task. Its sequence is **find arms → identify cameras → calibrate → verify movement → ready**. Reuse LeRobot's per-arm calibration. Daily startup should validate identity, calibration compatibility, camera health, and the start pose without requiring repeated range sweeps. Detailed behavior is in [CALIBRATION.md](CALIBRATION.md).
 
-Available today: `scripts/setup.sh`, `so101 init`, `doctor`, `ports`, `calibrations`, `calibration-import`, `configure`, `camera-preview` (live local browser view of one configured camera), `camera-check` (opens only configured cameras), and `teleop-command` (prints an upstream command; does not execute it). LeRobot's upstream control/recording tools are installed. Project-specific recording, training, and evaluation orchestration remain planned.
+Available today: `scripts/setup.sh`, `so101 init`, `doctor`, `ports`, `calibrations`, `calibration-import`, `configure`, `camera-preview` (live local browser view of one configured camera), `camera-check` (opens only configured cameras), and `teleop-command` (prints an upstream command; does not execute it). LeRobot's upstream control/recording tools are installed. `record-test` now starts one local commissioning episode after a setup countdown. Dataset acceptance/rejection, training, and evaluation orchestration remain planned.
 
 ## C0 — Confirm the setup
 
@@ -58,7 +58,7 @@ Pass: all six channels have the right identity/direction; leader/follower tracki
 
 ## C3 — Five demonstrations and data inspection
 
-Available preparation: `so101 record-command` prints a bounded, local single-episode commissioning command. See [RECORDING.md](RECORDING.md). It does not implement acceptance/rejection, provenance capture, or the full C3 gate.
+Available preparation: `so101 record-test` starts a local single-episode commissioning recording after a setup countdown, choosing a fresh folder each time. `so101 record-command` remains available to print an upstream command. See [RECORDING.md](RECORDING.md). It does not implement acceptance/rejection, provenance capture, or the full C3 gate.
 
 Deliver: local recording with start/stop/retry, explicit task labels, synchronized frames/joints/actions, and visual review. Uploading is off by default.
 

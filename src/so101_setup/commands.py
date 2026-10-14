@@ -4,8 +4,9 @@ import json
 import math
 import shlex
 from datetime import datetime, timezone
+from uuid import uuid4
 
-from .config import calibration_file, port_identity, validate_id
+from .config import CAMERA_WARMUP_S, calibration_file, port_identity, validate_id
 
 
 def _hardware_arguments(root, config, without_cameras=False):
@@ -50,6 +51,7 @@ def _hardware_arguments(root, config, without_cameras=False):
             cameras[camera["name"]] = {
                 "type": "opencv", "index_or_path": index,
                 "width": camera["capture_width"], "height": camera["capture_height"], "fps": camera["fps"],
+                "warmup_s": CAMERA_WARMUP_S,
             }
         if set(cameras) != {"overhead", "wrist"}:
             raise ValueError("Configure exactly the overhead and wrist camera views.")
@@ -67,14 +69,14 @@ def teleop_command(root, config, without_cameras=False):
     return shlex.join(args)
 
 
-def record_command(root, config, session=None):
-    """Print one local commissioning episode, not an accepted training dataset."""
-    session = validate_id(session or datetime.now(timezone.utc).strftime("raise-arm-smoke-%Y%m%dT%H%M%SZ"))
+def record_arguments(root, config, session=None):
+    """Build one local commissioning episode, not an accepted training dataset."""
+    session = validate_id(session if session is not None else
+                          datetime.now(timezone.utc).strftime("raise-arm-smoke-%Y%m%dT%H%M%SZ-") + uuid4().hex[:8])
     destination = root / "data" / session
     if destination.exists():
         raise ValueError(f"Dataset already exists: {destination}. Choose another --session; existing data is preserved.")
-    args = ["uv", "run", "--locked", "lerobot-record"]
-    args += _hardware_arguments(root, config)
+    args = _hardware_arguments(root, config)
     args += [
         f"--dataset.repo_id=local/{session}",
         f"--dataset.root={destination}",
@@ -98,4 +100,8 @@ def record_command(root, config, session=None):
         "--display_data=false",
         "--play_sounds=true",
     ]
-    return shlex.join(args)
+    return args
+
+
+def record_command(root, config, session=None):
+    return shlex.join(["uv", "run", "--locked", "lerobot-record", *record_arguments(root, config, session)])

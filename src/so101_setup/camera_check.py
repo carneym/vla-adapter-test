@@ -5,7 +5,7 @@ import math
 import time
 from datetime import datetime, timezone
 
-from .config import load_config
+from .config import CAMERA_WARMUP_S, load_config
 
 
 def camera_check(root, duration=60.0):
@@ -44,7 +44,7 @@ def camera_check(root, duration=60.0):
             print(f"Opening {name}, index {c['device']}, {c['capture_width']}x{c['capture_height']} at {c['fps']} fps...", flush=True)
             camera = OpenCVCamera(OpenCVCameraConfig(
                 index_or_path=c["device"], width=c["capture_width"], height=c["capture_height"],
-                fps=c["fps"], warmup_s=2,
+                fps=c["fps"], warmup_s=CAMERA_WARMUP_S,
             ))
             cameras[name] = camera
             timestamps[name] = []

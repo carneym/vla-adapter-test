@@ -10,7 +10,7 @@ Both cameras passed the 60-second capture timing test at 640×480 / 30 fps, and 
 
 Use `uv run --locked so101 camera-preview` to position the overhead camera with a live browser view. It opens only that camera and does not record or control the arm.
 
-Use `uv run --locked so101 record-command` to print a local 15-second recording command with the saved hardware settings. Review the printed command before running it. This commissioning episode stays out of training until reviewed.
+Use `uv run --locked so101 record-test` to start one local 15-second recording after a 15-second setup countdown, using a fresh dataset folder each time. This command enables teleoperation; stop camera previews and other motor sessions first. Add `--setup-seconds 30` for a longer countdown, or `--dry-run` to inspect without opening hardware. The commissioning episode stays out of training until reviewed.
 
 ## Set up this Mac
 
