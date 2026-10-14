@@ -60,6 +60,8 @@ Pass: all six channels have the right identity/direction; leader/follower tracki
 
 Available: LeLab provides multi-episode collection, teleoperated resets, redo controls, and dataset browsing through `bash scripts/lelab.sh`. See [RECORDING.md](RECORDING.md). The software integration is tested; five accepted physical demonstrations and per-session provenance are still required to complete C3.
 
+2026-10-14 physical evidence: [five episodes completed](../reports/2026-10-14-five-episode-test.md), with matching 1,227-frame camera streams and valid state/action rows. Recording/reset operation and file integrity passed. Endpoint framing, consistent holds, and complete provenance keep training acceptance open.
+
 Deliver: local recording with start/stop/retry, explicit task labels, synchronized frames/joints/actions, and visual review. Uploading is off by default.
 
 Test: record five short demonstrations of the first task and replay their videos with joint/action plots (no motor replay). Include an intentionally aborted episode to verify rejection. Confirm episode ends and resets are represented correctly.
@@ -75,7 +77,7 @@ Proposed data contract (must be checked against the chosen LeRobot revision):
 - Observation: RGB overhead image and wrist image, task text, and six follower position channels.
 - Channel order: shoulder pan, shoulder lift, elbow flex, wrist flex, wrist roll, gripper.
 - Action: the six commanded follower position targets recorded by teleoperation, with their timing relative to the observation stated explicitly.
-- Pinned-recorder finding: LeRobot 0.6.1 currently saves the leader's requested targets before the follower's relative target cap, not the `_sent_action` returned by `send_action`. Decide whether to train on desired or actual sent targets and keep inference consistent before accepting a training dataset. The commissioning command preserves upstream semantics; see [RECORDING.md](RECORDING.md#action-meaning-in-the-pinned-recorder).
+- Pinned-recorder finding: LeRobot 0.6.1 currently saves the leader's requested targets before the follower's relative target cap, not the `_sent_action` returned by `send_action`. Decide whether to train on desired or actual sent targets and keep inference consistent before accepting a training dataset. The commissioning command preserves upstream semantics; see [RECORDING.md](RECORDING.md#action-meaning-and-training).
 - Preserve the calibrated units and gripper convention in metadata; do not reinterpret values as Cartesian poses or raw servo ticks.
 - Set action dimension and proprioception dimension to six throughout the loader, action head, normalization, checkpoint, and inference path. Start with a short action chunk and choose its length from measured latency.
 - Compute normalization on the training split only. Store channel order, transforms, camera preprocessing, joint units, and normalization with every checkpoint.

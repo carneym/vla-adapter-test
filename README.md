@@ -6,7 +6,7 @@ Repository: [carneym/vla-adapter-test](https://github.com/carneym/vla-adapter-te
 
 **Status: functioning teleoperation confirmed on the MacBook, with a 5° relative target limit.** Setup helpers, machine-local settings, calibration import, teleoperation command generation, and a simultaneous camera check are available. See the [teleoperation checkpoint](reports/2026-10-14-teleoperation.md) for evidence and remaining hardware checks. VLA-Adapter data conversion, training, and inference remain planned.
 
-Local commissioning recordings have been saved and reviewed. Use **LeLab** for the next collection: one session with repeated demonstrations, teleoperated resets, and redo controls. See the [recording guide](docs/RECORDING.md). Wrist-camera reliability during movement and acceptance of five clean demonstrations remain physical checkpoints.
+A [five-episode LeLab test](reports/2026-10-14-five-episode-test.md) completed successfully: both camera videos match all 1,227 state/action rows, with no camera timeout in that session. Use **LeLab** for collection with teleoperated resets and redo controls; see the [recording guide](docs/RECORDING.md). These takes remain pipeline tests: final-pose visibility, consistent holds, and training-data acceptance are still open.
 
 Use `uv run --locked so101 camera-preview` to position the overhead camera with a live browser view. It opens only that camera and does not record or control the arm.
 
