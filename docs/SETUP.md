@@ -74,6 +74,16 @@ uv run --locked so101 configure --overhead-camera=0 --wrist-camera=1
 
 The indices above are examples. Initial settings are 640×480 at 30 fps per camera to limit USB and memory load on the 8 GB MacBook. If a camera does not support that mode, edit its capture settings in `configs/hardware.local.json` after checking its supported modes. Device indices can change after reconnecting; re-identify them on every machine.
 
+To position a configured camera with a live view:
+
+```sh
+uv run --locked so101 camera-preview
+# Or preview the wrist:
+uv run --locked so101 camera-preview --camera wrist
+```
+
+Open the local URL printed in the terminal. The browser shows a live view at up to 15 fps and a **Stop camera** button. This preview records nothing, opens only the selected camera, and binds only to this Mac's loopback address. The camera keeps capturing at its configured rate. Stop it with the button or Ctrl+C before running other camera commands; closing the tab alone does not release the camera. It automatically stops after 30 minutes; `--duration=300` sets a five-minute limit. The URL changes each time it starts.
+
 Then test both configured cameras together, with arm control stopped:
 
 ```sh

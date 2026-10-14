@@ -8,6 +8,8 @@ Repository: [carneym/vla-adapter-test](https://github.com/carneym/vla-adapter-te
 
 Both cameras passed the 60-second capture timing test at 640×480 / 30 fps. Overhead framing still needs adjustment before demonstrations; see the [camera checkpoint](reports/2026-10-14-cameras.md).
 
+Use `uv run --locked so101 camera-preview` to position the overhead camera with a live browser view. It opens only that camera and does not record or control the arm.
+
 ## Set up this Mac
 
 ```sh

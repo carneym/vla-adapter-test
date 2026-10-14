@@ -21,6 +21,9 @@ def main(argv=None):
     commands.add_parser("calibrations", help="List existing LeRobot calibration files without changing them")
     cameras = commands.add_parser("camera-check", help="Open both configured cameras, save previews, and measure capture; no arm access")
     cameras.add_argument("--duration", type=float, default=60.0)
+    preview = commands.add_parser("camera-preview", help="Show one camera in a local browser; no recording or arm access")
+    preview.add_argument("--camera", choices=("overhead", "wrist"), default="overhead")
+    preview.add_argument("--duration", type=float, default=1800.0, help="Automatic stop in seconds (default: 30 minutes)")
     imported = commands.add_parser("calibration-import", help="Copy a chosen calibration into ignored local storage")
     imported.add_argument("--role", choices=("leader", "follower"), required=True)
     imported.add_argument("--source", required=True)
@@ -70,6 +73,9 @@ def main(argv=None):
             from .camera_check import camera_check
             result = camera_check(root, args.duration)
             return 0 if result["capture_check_passed"] else 1
+        elif args.command == "camera-preview":
+            from .camera_preview import camera_preview
+            camera_preview(root, args.camera, args.duration)
         elif args.command == "calibration-import":
             print(import_calibration(root, args.role, args.source, args.arm_id))
             print("Original preserved. Imported file has the expected schema; physical calibration is unverified.")
