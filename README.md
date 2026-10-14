@@ -6,11 +6,17 @@ Repository: [carneym/vla-adapter-test](https://github.com/carneym/vla-adapter-te
 
 **Status: functioning teleoperation confirmed on the MacBook, with a 5° relative target limit.** Setup helpers, machine-local settings, calibration import, teleoperation command generation, and a simultaneous camera check are available. See the [teleoperation checkpoint](reports/2026-10-14-teleoperation.md) for evidence and remaining hardware checks. VLA-Adapter data conversion, training, and inference remain planned.
 
-Both cameras passed the 60-second capture timing test at 640×480 / 30 fps, and the operator accepted the adjusted camera position. Next is a [single raise-arm recording test](docs/RECORDING.md) to check motion visibility and dataset output; see the [camera checkpoint](reports/2026-10-14-cameras.md).
+Local commissioning recordings have been saved and reviewed. Use **LeLab** for the next collection: one session with repeated demonstrations, teleoperated resets, and redo controls. See the [recording guide](docs/RECORDING.md). Wrist-camera reliability during movement and acceptance of five clean demonstrations remain physical checkpoints.
 
 Use `uv run --locked so101 camera-preview` to position the overhead camera with a live browser view. It opens only that camera and does not record or control the arm.
 
-Use `uv run --locked so101 record-test` to start one local 15-second recording after a 15-second setup countdown, using a fresh dataset folder each time. This command enables teleoperation; stop camera previews and other motor sessions first. Add `--setup-seconds 30` for a longer countdown, or `--dry-run` to inspect without opening hardware. The commissioning episode stays out of training until reviewed.
+After the initial hardware setup, launch the collection interface:
+
+```sh
+bash scripts/lelab.sh
+```
+
+Select the prefilled **SO101** profile. The UI starts idle; its recording controls enable teleoperation when you start a session. The launcher carries over saved calibration, the 5° target cap, five-second camera warmup, and H.264 encoding. Stop camera previews and other motor sessions before starting. The older `so101 record-test` remains available for one-off diagnostics.
 
 ## Set up this Mac
 
@@ -79,6 +85,8 @@ Every gate produces evidence and a repeatable test. A failed gate stays open; im
 configs/hardware.example.json    Unconfigured hardware inventory template
 pyproject.toml / uv.lock         Pinned Apple Silicon control environment
 scripts/setup.sh                Repeatable setup for either Mac
+scripts/lelab.sh                Launch LeLab with the saved SO101 profile
+integrations/lelab/             Separately pinned LeLab environment and integration tests
 src/so101_setup/                Local config, calibration import, checks, command generation
 docs/SETUP.md                   Install, verify, and move between Macs
 docs/PLAN.md                    Architecture, implementation work, and test gates

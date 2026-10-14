@@ -110,7 +110,28 @@ Press **Ctrl+C** in the terminal running teleoperation to stop command streaming
 
 Pass: after a supervised test, both arms correspond correctly and both views are usable. The generated command is upstream teleoperation, not the planned autonomous controller/watchdog. The full C2 hardware checks in [PLAN.md](PLAN.md) still apply.
 
-For the next hardware test, see [First raise-arm recording](RECORDING.md). `uv run --locked so101 record-test` starts one local 15-second episode using both cameras and the saved 5° relative target cap after a 15-second setup countdown. Every attempt gets a fresh dataset folder; camera startup uses a five-second warmup allowance. Add `--setup-seconds 30` for more setup time. Unlike `record-command`, this command actually enables teleoperation and records; `--dry-run` only prints the launch plan.
+## Collect with LeLab
+
+```sh
+bash scripts/lelab.sh
+```
+
+This installs/uses the separate locked environment in `.cache/lelab/venv` and opens [LeLab](https://github.com/huggingface/leLab) at `http://127.0.0.1:8000`. Choose the prefilled **SO101** robot. See [Recording with reset loops](RECORDING.md) for the first five-episode session and controls. Opening the UI does not connect the arms; starting teleoperation or recording does.
+
+The launcher reads `configs/hardware.local.json` and uses the existing calibration files. It applies the 5° target cap, degree units, hold-on-disconnect setting, five-second camera warmup, and bounded H.264 encoding. At connection, it verifies motor calibration against the selected files instead of rewriting it. If those differ, inspect/import the correct calibration with the existing setup tools before collecting; this launcher is for the already calibrated pair.
+
+LeLab is pinned to commit `9b5afaee33baa1d773e499937564f3831d25de22`; its upstream dependency is LeRobot **v0.6.0**, separate from the original **0.6.1** CLI environment. Its transitive dependencies are locked in `integrations/lelab/uv.lock`. The first launch downloads dependencies and builds the UI; later launches reuse them. Both environments target Apple Silicon/Python 3.12. No model or paid training job is started by this command. Use this project launcher so the saved motion settings are applied.
+
+Run `bash scripts/lelab.sh --check` to validate generated settings without opening devices or a server. For software integration checks:
+
+```sh
+UV_PROJECT_ENVIRONMENT="$PWD/.cache/lelab/venv" UV_CACHE_DIR="$PWD/.cache/uv" \
+  uv run --project integrations/lelab --locked python -m unittest discover -s integrations/lelab/tests -v
+```
+
+GUI camera edits persist locally. Changing camera settings in `hardware.local.json` refreshes the seeded cameras on the next launch; ports and calibration selection always follow that file. Browser camera identities differ from USB identities, so confirm overhead/wrist views after changing USB connections. Move the local config and calibration files privately to the Mac mini, reselect its ports/camera indices, and run the same launcher. Do not copy virtual environments between machines.
+
+New GUI datasets live under `data/lelab/<namespace>/<timestamped-name>/`. Existing CLI recordings remain in `data/`; the GUI does not automatically migrate them. LeLab state lives under `.cache/lelab/state/`. These directories and calibration files remain outside Git. Stop a recording through the UI and wait for saving to finish before closing the server with Ctrl+C.
 
 ## Move to the other Mac
 

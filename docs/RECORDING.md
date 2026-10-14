@@ -1,61 +1,69 @@
-# First raise-arm recording
+# Recording with reset loops
 
-The camera position has been accepted by the operator. The next step is **one local 15-second commissioning episode**, followed by review. This is not an accepted training dataset or a completed C3 gate. The remaining pose, stop, and reconnect checks in [C2](PLAN.md#c2--calibrate-teleoperate-and-reconnect) still apply before collecting the training set.
+Use [LeLab](https://github.com/huggingface/leLab) to collect repeated demonstrations in one session. Keep the accepted camera placement fixed and use the lower, bent-elbow raised pose that remains visible. Previous smoke recordings are commissioning evidence; the next checkpoint is five reviewed, clean raise-and-hold demonstrations.
 
-## Prepare
+## Start a session
 
-1. Keep the camera and follower base fixed. Stop the live camera preview and any other teleoperation process so the recorder can use the devices.
-2. Use the working calibrated setup, with the leader and follower in corresponding starting poses and the follower's workspace clear.
-3. Start a test from the saved settings:
-
-   ```sh
-   uv run --locked so101 record-test
-   ```
-
-   This starts a **15-second setup countdown**, then connects the cameras and arms and starts the upstream recorder. Ctrl+C during the countdown cancels without opening any devices. Each invocation chooses a new timestamped dataset name with a random suffix; no copying of a generated command is needed. No Hugging Face login or Modal job is needed.
-
-   For more setup time:
+1. Stop other teleoperation, recording, and camera-preview processes. Put the leader and follower in corresponding starting poses, with the workspace clear.
+2. From this checkout, run:
 
    ```sh
-   uv run --locked so101 record-test --setup-seconds 30
+   bash scripts/lelab.sh
    ```
 
-   The setup countdown happens before device connection, so it does not enable teleoperation for repositioning. Use the leader to reset the follower with the teleoperation command first if needed. After setup, each camera has a five-second warmup/read allowance. Begin the demonstration only when **Recording episode 0** is announced. The episode itself lasts up to 15 seconds.
+3. Select **SO101**, open the **Dataset** dropdown, and choose **Create new dataset…**. Enter a name such as `raise-arm-c3`. In **Configure Recording**, use:
 
-To inspect without starting anything, add `--dry-run`. The older `record-command` helper still prints an upstream command for manual review, but that printed command keeps a fixed output name; prefer `record-test` for retries.
+   | Setting | Value |
+   | --- | --- |
+   | Task description | `Raise your arm.` |
+   | Episodes | `5` |
+   | Episode duration | `30` seconds (time allowed to finish and accept a take) |
+   | Reset duration | `30` seconds |
+   | Cameras | `overhead` and `wrist`, 640×480 at 30 fps |
+   | Streaming encoding | Enabled |
 
-### If the output folder already exists
+4. Check the two camera views, then start when ready. Starting the session connects the arms and enables teleoperation. LeLab first enters **Resetting**, with no frames saved. Use the leader to settle the follower into its starting pose. Click **Start Next Episode** when ready, or wait for the reset timer.
+5. During **Recording**, smoothly raise the arm and hold the final pose for about three seconds. Click **End Episode** to save the take before returning to rest. The session enters **Resetting** again, and you use the leader to return the follower to the starting pose. Repeat until five takes have been saved.
 
-`FileExistsError` during `LeRobotDataset.create` means the selected output folder already exists. LeRobot requires a new folder even when the existing one contains only metadata from an interrupted attempt. Do not create the dataset directory in advance. Preserve the old attempt and run `so101 record-test` for a fresh name. Do not use `--resume=true` on an incomplete dataset merely to suppress this error.
+The reset is a period of active teleoperation without recording. It does **not** automatically drive the arm to a stored home position. Return-to-rest movement belongs in this interval, outside the demonstration.
 
-### If a camera times out
+## Controls
 
-The initial recorder used LeRobot's one-second camera warmup default. The helpers now explicitly use five seconds, including camera previews and checks. A successful camera-only test after the change measured 30.07 fps overhead and 30.09 fps wrist; recording with arm control still requires verification. If startup still fails, stop other preview/recording processes and run `so101 camera-check --duration 5` to isolate camera access before another motor session. The TorchCodec warning followed by a PyAV fallback is separate from a camera frame timeout; PyAV successfully passed the local dataset save test.
+Keep the recording page focused for shortcuts.
 
-## Demonstrate once
+| Control | Result |
+| --- | --- |
+| **End Episode**, Space, or Right arrow during recording | Save the current take and enter reset |
+| **Start Next Episode**, Space, or Right arrow during reset | End reset early and begin recording |
+| **Re-record**, Left arrow, or Delete/Backspace | Discard the current take, reset, and retry that episode |
+| **Stop recording** in the menu, or Escape and confirm | End the session; previously saved episodes are retained |
 
-When the terminal announces **Recording episode 0**, smoothly raise the arm with the leader to the chosen reachable pose, then hold it for at least two seconds. Keep the gripper state consistent. Press **n** (or Right arrow) to end the episode after the hold, or let the 15-second timer finish. Keep any return-to-rest movement outside the recorded episode.
+In the pinned LeLab version, **recording timeout requests a redo, rather than accepting the take**. Press **End Episode** for each successful demonstration. Reset timeout starts the next recording. Stop can discard the in-progress take, so end an episode first if you want to keep it. Wait for saving/finalization to finish before closing the server.
 
-Keep the recording terminal focused for keyboard controls. If the demonstration is wrong, **r** (or Left arrow) requests a retry; the recorder provides a 10-second reset interval with teleoperation still active before retrying. **q** (or Esc) stops recording but can still save the partial episode. Ctrl+C interrupts the process; inspect any partial output before reusing it. A stopped or failed attempt must not be treated as a successful demonstration.
+## Settings and files
 
-The follower uses the working relative target cap of **5** and remains powered at the last target after a normal disconnect (`disable_torque_on_disconnect=false`). This is the same hold behavior as the teleoperation command. Recording itself does not implement the planned autonomous watchdog.
+The project launcher preloads the saved pair and preserves degree units, `max_relative_target=5`, and `disable_torque_on_disconnect=false`. The cap is relative to measured joint position: five degrees for arm joints and five percentage points for the gripper. It is not a velocity limit. The follower continues holding its last target after normal disconnect. The launcher verifies existing motor calibration before configuring control; it does not rewrite calibration during collection.
 
-## Output and review
+The seeded camera indices are ready for backend capture. If the setup form says **No browser match**, the browser preview has not been bound to a browser camera ID; this is separate from OpenCV capture. To enable previews, use **Configure → Cameras** to select the same devices in the browser and retain the names `overhead` and `wrist`. Confirm the view identities before collecting after any USB changes.
 
-The dataset is written under `data/raise-arm-smoke-<UTC timestamp>-<random suffix>/`, which is ignored by Git. Uploading and resuming are disabled. Both configured cameras are included at 640×480 / 30 fps with the current machine settings. H.264 video is encoded through PyAV while recording, using two encoder threads per camera and bounded queues. Visualization is disabled to reduce load on the 8 GB MacBook; the terminal announces episode transitions.
+Both cameras have a five-second startup allowance. H.264 encoding uses two threads per camera and a bounded queue. The existing 500 ms stale-frame failure remains active. A UI cannot fix an intermittent wrist-camera cable/hub fault: if frames time out, preserve saved episodes, inspect the failure, and test camera access before retrying. The TorchCodec-to-PyAV fallback warning is separate from camera acquisition failures.
 
-After the test, inspect both videos without replaying motor actions. Check that the entire raise and hold are visible, timestamps and episode boundaries are valid, both videos have the same number of frames as the state/action table, and all six state/action channels are finite. Record actual throughput and any slow-loop or encoder-drop warnings; logical dataset timestamps alone do not establish wall-clock capture speed. If the raised position leaves the image, adjust the camera before collecting more data.
+New datasets are local at `data/lelab/<namespace>/<timestamped-name>/`, ignored by Git. LeLab appends timestamps to new session names, so there is no need to copy a fresh recording command. Recording starts with Hub upload disabled. Use **Datasets** to inspect completed takes and, when appropriate, **Record More Episodes** to append to a completed dataset. Existing CLI smoke recordings remain in their original `data/raise-arm-smoke-*` folders; they are not automatically imported into this browser.
 
-The command generator and codec setup have software checks; simultaneous camera capture, motor control, and dataset writing still require this physical test. After reviewing it and completing the remaining C2 checks, prepare the five-episode C3 collection with explicit acceptance/rejection and calibration/configuration provenance.
+On another Mac, follow [SETUP.md](SETUP.md): clone the repository, privately copy/import the selected calibration and machine settings, update device indices/ports, and launch the same script. The separately locked LeLab environment uses its upstream LeRobot v0.6.0; the CLI environment remains at 0.6.1.
 
-Software verification on 2026-10-14: all 17 automated tests passed, including parsing this command through pinned LeRobot and refusing existing dataset folders. A two-stream synthetic encoder check produced and decoded 60 frames per stream at 640×480 using the selected H.264 settings, with matching frame counts and increasing timestamps. No arms or cameras were accessed by that encoder check.
+## Checkpoints
 
-After the first folder-collision report, the original `raise-arm-smoke-001` folder contained only metadata with zero episodes and zero frames; it was preserved. An additional complete synthetic dataset test successfully created a new dataset, saved and finalized one six-frame episode, and decoded six frames from each camera video. The default decoder reported the known TorchCodec library warning and successfully fell back to PyAV. This verified dataset saving without opening hardware, not a physical demonstration.
+1. **Software:** `bash scripts/lelab.sh --check` validates the configured arms, cameras, encoder, and reset parameters without opening devices. Integration tests exercise native record/reset/redo handlers with fake devices and a real two-camera encoded dataset.
+2. **First UI take:** collect one raise-and-hold, explicitly end it, reset, and verify the saved videos. This is the first physical test of the LeLab integration; software tests do not prove motor or camera reliability.
+3. **Five accepted takes:** inspect both camera views, all six finite state/action channels, episode boundaries, and matching video/table frame counts. Reject cropped motion, reset movement inside an episode, aborted takes, or camera failures. Logical dataset timestamps alone do not establish wall-clock capture throughput. Complete the remaining pose, stop, and reconnect checks in [C2](PLAN.md#c2--calibrate-teleoperate-and-reconnect) before accepting the collection gate.
 
-Launcher verification: all 21 automated tests pass, including countdown ordering, cancellation before device access, fresh retry names, and the pinned LeRobot parser accepting the five-second camera settings. The new launcher was dry-run only; no physical recording was started by the agent.
+## Action meaning and training
 
-## Action meaning in the pinned recorder
+The default LeRobot recording pipeline saves the leader's desired position targets as `action`. The follower applies the relative target cap inside `send_action`; the returned capped `_sent_action` is not saved as the action column. This applies to both pinned environments. Do not label these actions as exact motor commands.
 
-In installed LeRobot 0.6.1, the default recording pipeline saves the leader's requested position targets as `action`. The SO-101 follower subsequently caps target error relative to its measured position inside `send_action`. The recorder receives the capped targets as `_sent_action` but does not save that return value as `action`. Therefore the test dataset's action column must not be labelled as the exact target sent to each motor.
+Before training, choose and validate either desired targets with the same cap at inference, or explicit recording of actual sent targets. Per-session calibration/configuration provenance and episode acceptance also remain part of C4. LeLab supplies the collection interface; VLA-Adapter conversion and the USD 20 Modal training path still need implementation. No paid training has started.
 
-This test preserves upstream behavior. Before accepting a training dataset, explicitly choose and validate the action contract: either retain desired targets with the same cap at inference, or add recording of the actual sent targets. Also add per-session calibration/configuration provenance and explicit rejection of aborted episodes. The C4 data contract remains pending until that decision is implemented and tested; do not train on the commissioning episode by accident.
+## One-off CLI diagnostics
+
+`uv run --locked so101 record-test` still records one 15-second commissioning episode with a fresh folder and a 15-second setup countdown. Add `--setup-seconds 30` for more preparation time or `--dry-run` to inspect without devices. The countdown precedes connection and is not a teleoperated reset interval. Prefer LeLab for repeated collection.

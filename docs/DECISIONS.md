@@ -15,7 +15,7 @@ Updated 2026-10-13.
 - “Glasses” means eyeglasses.
 - Pull the tissue from a box, raise and hold it, then put it away; put-away may be a separate trained action.
 - Both raise-arm and wave must be learned. Recorded motions are only for hardware tests.
-- Use a command-line interface and start with raise-arm.
+- Start with raise-arm. Use LeLab for repeated recording/reset/redo sessions (operator preference updated 2026-10-14); retain command-line setup and diagnostic tools.
 - Both arms are assembled and already moving through software.
 - The M2 MacBook Air has 8 GB RAM; the M4 Mac mini has 16 GB RAM.
 - Put the tissue down beside the box and release it. Release is permitted; exact destinations for other pickups remain open.
