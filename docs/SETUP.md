@@ -133,6 +133,28 @@ GUI camera edits persist locally. Changing camera settings in `hardware.local.js
 
 New GUI datasets live under `data/lelab/<namespace>/<timestamped-name>/`. Existing CLI recordings remain in `data/`; the GUI does not automatically migrate them. LeLab state lives under `.cache/lelab/state/`. These directories and calibration files remain outside Git. Stop a recording through the UI and wait for saving to finish before closing the server with Ctrl+C.
 
+## Short local ACT training in LeLab
+
+The MacBook can run a small ACT experiment using its Apple GPU. This is a separate baseline from the planned VLA-Adapter/Modal implementation. Start LeLab with the project launcher above, open **Training**, and use:
+
+| Setting | MacBook smoke run |
+| --- | --- |
+| Compute target | Local — your machine (free) |
+| Dataset | Select the local five-episode dataset |
+| Policy | ACT |
+| Training steps / batch size | 50 / 1 |
+| Advanced → Device | MPS (Apple Silicon) |
+| Number of workers | 0 |
+| Log frequency / save frequency | 10 / 50 |
+| Save checkpoints / use policy training preset | On / on |
+| AMP / W&B / resume | Off / off / off |
+
+For the initial test, the dataset ID is `local/raise-arm-c3_20261014_175556`. If it is absent from the dropdown, use **Use custom repo ID** with that exact ID. Local training reads the files under `data/lelab/`; it does not require a Hugging Face upload or token. The cloud-token banner does not apply to this local job. The project launcher explicitly selects PyAV decoding for local macOS training because the pinned TorchCodec package can be installed while its FFmpeg libraries cannot load.
+
+Free several GB before starting (aim for at least 5 GB on this 8 GB Mac, including room for swap). A stock ACT policy is about 197 MiB, and its optimizer state needs roughly another 394 MiB. Jobs are saved by LeLab under `~/.cache/huggingface/lerobot/outputs/train/<job-id>/`, outside the repository. The model, configuration, and normalization files are in `run/checkpoints/<step>/pretrained_model/`; exact training resume also requires the complete `training_state/` directory. Transfer these privately if needed on another Mac.
+
+The [first local ACT test](../reports/2026-10-14-act-smoke.md) completed 50 updates and saved a model that passed offline reload/prediction checks. Disk exhaustion interrupted the optimizer save, so that job is correctly marked failed and is **not resumable**. Fifty updates on five demonstrations establish that the training path works; they do not establish a reliable raise-arm policy. Keep **Run inference** unused until a separate supervised robot evaluation is prepared.
+
 ## Move to the other Mac
 
 1. Clone the repository and run setup there. Do not copy `.venv`, `.cache`, or `.python`; rebuild from the lockfile.

@@ -106,6 +106,20 @@ class LeLabIntegrationTests(unittest.TestCase):
         self.assertEqual(follower.bus.write_calibration.__name__, "verify")
         self.assertEqual(leader.bus.write_calibration.__name__, "verify")
 
+    def test_mac_training_uses_pyav_without_changing_cloud_command(self):
+        from lelab.jobs import JobTarget
+        from lelab.train import TrainingRequest, build_training_command
+
+        request = TrainingRequest(dataset_repo_id="local/test", policy_device="mps",
+                                  steps=50, batch_size=1, num_workers=0)
+        with patch("so101_setup.lelab_app.sys.platform", "darwin"):
+            cmd = build_training_command(request, "/tmp/act-test", sys.executable)
+            self.assertEqual(cmd[cmd.index("--dataset.video_backend") + 1], "pyav")
+            self.assertEqual(cmd[cmd.index("--policy.push_to_hub") + 1], "false")
+            cloud = build_training_command(request, "/tmp/act-cloud", job_target=JobTarget(
+                runner="hf_cloud", flavor="a10g-small"))
+            self.assertNotIn("--dataset.video_backend", cloud)
+
     def test_record_reset_redo_loop_saves_real_dataset_with_fake_hardware(self):
         import av
         import numpy as np
@@ -155,6 +169,13 @@ class LeLabIntegrationTests(unittest.TestCase):
         for path in videos:
             with av.open(str(path)) as video:
                 self.assertEqual(sum(1 for _ in video.decode(video=0)), 12)
+        # Exercise the decoder used by local training, including both camera keys.
+        from lerobot.datasets.lerobot_dataset import LeRobotDataset
+
+        loaded = LeRobotDataset("local/loop-test", root=cfg.dataset.root, video_backend="pyav")
+        sample = loaded[7]
+        for name in ("overhead", "wrist"):
+            self.assertEqual(tuple(sample[f"observation.images.{name}"].shape), (3, 480, 640))
 
 
 if __name__ == "__main__":

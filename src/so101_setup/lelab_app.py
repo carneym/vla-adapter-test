@@ -7,6 +7,7 @@ Importing this module does not import LeRobot or open devices.
 import argparse
 import json
 import os
+import sys
 from functools import wraps
 from pathlib import Path
 
@@ -138,6 +139,22 @@ def install_adapters(root, config):
         return cfg
 
     record.create_record_config = create_record_config
+
+    from lelab import train
+
+    upstream_training_command = train.build_training_command
+
+    @wraps(upstream_training_command)
+    def build_training_command(request, output_dir, python_executable="python", job_target=None):
+        cmd = upstream_training_command(request, output_dir, python_executable, job_target)
+        # The pinned LeRobot default detects TorchCodec's package, but does not
+        # verify that its FFmpeg dylibs load on macOS. PyAV reads our H.264 files
+        # without that system-library dependency. Cloud runners keep their default.
+        if sys.platform == "darwin" and (job_target is None or job_target.runner == "local"):
+            cmd.extend(["--dataset.video_backend", "pyav"])
+        return cmd
+
+    train.build_training_command = build_training_command
 
 
 def prepare(root):

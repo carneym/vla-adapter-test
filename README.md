@@ -8,6 +8,8 @@ Repository: [carneym/vla-adapter-test](https://github.com/carneym/vla-adapter-te
 
 A [five-episode LeLab test](reports/2026-10-14-five-episode-test.md) completed successfully: both camera videos match all 1,227 state/action rows, with no camera timeout in that session. Use **LeLab** for collection with teleoperated resets and redo controls; see the [recording guide](docs/RECORDING.md). These takes remain pipeline tests: final-pose visibility, consistent holds, and training-data acceptance are still open.
 
+A [local ACT smoke test](reports/2026-10-14-act-smoke.md) completed 50 updates on the MacBook's Apple GPU. Saved weights pass offline inference checks; a full resumable checkpoint is still blocked by disk space. Repeatable LeLab settings are in [Setup](docs/SETUP.md#short-local-act-training-in-lelab).
+
 Use `uv run --locked so101 camera-preview` to position the overhead camera with a live browser view. It opens only that camera and does not record or control the arm.
 
 After the initial hardware setup, launch the collection interface:
