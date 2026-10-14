@@ -4,7 +4,9 @@ Build a language-conditioned policy for one SO-101 follower arm, using an SO-101
 
 Repository: [carneym/vla-adapter-test](https://github.com/carneym/vla-adapter-test).
 
-**Status: portable LeRobot environment implemented and software-checked on the MacBook.** Setup helpers, machine-local settings, calibration import, and teleoperation command generation are available. Camera/arm operation is not yet verified in this environment. VLA-Adapter data conversion, training, and inference remain planned.
+**Status: functioning teleoperation confirmed on the MacBook, with a 5° relative target limit.** Setup helpers, machine-local settings, calibration import, teleoperation command generation, and a simultaneous camera check are available. See the [teleoperation checkpoint](reports/2026-10-14-teleoperation.md) for evidence and remaining hardware checks. VLA-Adapter data conversion, training, and inference remain planned.
+
+Both cameras passed the 60-second capture timing test at 640×480 / 30 fps. Overhead framing still needs adjustment before demonstrations; see the [camera checkpoint](reports/2026-10-14-cameras.md).
 
 ## Set up this Mac
 
@@ -32,7 +34,7 @@ The setup installs the pinned dependencies into `.venv`, preserves existing loca
 | M2 MacBook Air (8 GB), initial host; M4 Mac mini (16 GB), later option | Setup, calibration, camera capture, leader/follower teleoperation, recording, and local motor control |
 | Modal GPU | VLA-Adapter training, with a USD 20 total initial experiment budget |
 | Inference host | Local or online; select after measuring compatibility, latency, and cost. Offline operation is not required |
-| Cameras | One wrist camera and one overhead 4K camera; modes and frame rates to be measured |
+| Cameras | USB2.0_CAM1 wrist camera and Logi 4K Pro overhead camera; initial capture mode 640×480 at 30 fps |
 
 Keep the robot interface separate from the CUDA training environment. Use LeRobot's SO-101 hardware support, retain its calibration, and add an explicit six-channel SO-101 adapter to VLA-Adapter.
 

@@ -74,6 +74,16 @@ uv run --locked so101 configure --overhead-camera=0 --wrist-camera=1
 
 The indices above are examples. Initial settings are 640×480 at 30 fps per camera to limit USB and memory load on the 8 GB MacBook. If a camera does not support that mode, edit its capture settings in `configs/hardware.local.json` after checking its supported modes. Device indices can change after reconnecting; re-identify them on every machine.
 
+Then test both configured cameras together, with arm control stopped:
+
+```sh
+uv run --locked so101 camera-check
+```
+
+This opens only the two configured indices for 60 seconds through LeRobot, saves first/last previews and a JSON timing report under `.cache/camera-check/`, and closes the cameras. It never opens arm ports. The initial capture gate requires at least 95% of the requested frame rate per camera and no observed gap over 200 ms. Timing uses distinct host frame timestamps, so it is not a sensor synchronization test or an exact hardware dropped-frame count. Inspect framing separately: the overhead view should contain the follower's task workspace and the wrist view should show the gripper and nearby objects. A short `--duration=5` run is useful for preview but does not complete the 60-second checkpoint.
+
+The [first camera checkpoint](../reports/2026-10-14-cameras.md) measured 29.97 fps overhead and 30.02 fps wrist with both connected through the hub. Those measurements establish capture timing for that setup; overhead framing and throughput during demonstration recording still need verification.
+
 Generate the command:
 
 ```sh
@@ -83,6 +93,10 @@ uv run --locked so101 teleop-command
 ```
 
 These commands **print only**. Review the output and run it explicitly when the workspace is clear and the arms are ready. The printed command supplies each calibration directory and ID, sets both arms to degree units, and optionally displays both camera streams through LeRobot's visualization. The gripper still follows LeRobot's gripper normalization; do not treat every channel as a joint angle. Do not pipe the printed output into `eval`.
+
+The generated command runs at **30 Hz** and includes `--robot.max_relative_target=5.0`. This setup's operator confirmed functioning teleoperation at 5 after elbow/wrist movement was ineffective with limits of 1 and 2. The limit caps the requested position relative to each motor's **measured position**: 5 degrees for arm joints and 5 percentage points for the gripper. It is not a speed limit or a guarantee of smooth tracking. The setting is saved as `follower.max_relative_target` in the local configuration and is the project default for older configurations that omit it.
+
+Press **Ctrl+C** in the terminal running teleoperation to stop command streaming. The generated command also includes `--robot.disable_torque_on_disconnect=false`, so the follower stays powered and holds its last target after a normal stop. This preserves the stop behavior used during initial testing. It does not release the arm, and failed communication or a crashed process is not a verified stop. See the [hardware checkpoint](../reports/2026-10-14-teleoperation.md) for completed checks and remaining verification.
 
 Pass: after a supervised test, both arms correspond correctly and both views are usable. The generated command is upstream teleoperation, not the planned autonomous controller/watchdog. The full C2 hardware checks in [PLAN.md](PLAN.md) still apply.
 

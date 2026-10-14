@@ -108,6 +108,34 @@ class SetupTests(unittest.TestCase):
         command = teleop_command(target, load_config(target), without_cameras=True)
         self.assertIn(str(target / "calibration/follower"), command)
 
+    def test_teleop_settings_reject_invalid_limits_and_preserve_explicit_values(self):
+        configure(self.root, leader_port="/dev/leader", follower_port="/dev/follower")
+        for role in ("leader", "follower"):
+            import_calibration(self.root, role, self.source)
+        config = load_config(self.root)
+        for invalid in (None, True, 0, -1, float("nan"), float("inf"), "5"):
+            config["follower"]["max_relative_target"] = invalid
+            with self.subTest(invalid=invalid), self.assertRaises(ValueError):
+                teleop_command(self.root, config, without_cameras=True)
+        config["follower"].update(max_relative_target=3.0, disable_torque_on_disconnect=True)
+        args = shlex.split(teleop_command(self.root, config, without_cameras=True))
+        self.assertIn("--robot.max_relative_target=3.0", args)
+        self.assertIn("--robot.disable_torque_on_disconnect=true", args)
+        config["follower"]["disable_torque_on_disconnect"] = "false"
+        with self.assertRaises(ValueError):
+            teleop_command(self.root, config, without_cameras=True)
+
+    def test_older_machine_config_gets_observed_teleop_defaults(self):
+        configure(self.root, leader_port="/dev/leader", follower_port="/dev/follower")
+        for role in ("leader", "follower"):
+            import_calibration(self.root, role, self.source)
+        config = load_config(self.root)
+        config["follower"].pop("max_relative_target")
+        config["follower"].pop("disable_torque_on_disconnect")
+        args = shlex.split(teleop_command(self.root, config, without_cameras=True))
+        self.assertIn("--robot.max_relative_target=5.0", args)
+        self.assertIn("--robot.disable_torque_on_disconnect=false", args)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -19,6 +19,8 @@ def main(argv=None):
     doctor.add_argument("--json", action="store_true")
     commands.add_parser("ports", help="List serial devices without opening them")
     commands.add_parser("calibrations", help="List existing LeRobot calibration files without changing them")
+    cameras = commands.add_parser("camera-check", help="Open both configured cameras, save previews, and measure capture; no arm access")
+    cameras.add_argument("--duration", type=float, default=60.0)
     imported = commands.add_parser("calibration-import", help="Copy a chosen calibration into ignored local storage")
     imported.add_argument("--role", choices=("leader", "follower"), required=True)
     imported.add_argument("--source", required=True)
@@ -64,6 +66,10 @@ def main(argv=None):
             paths = calibration_candidates()
             print("\n".join(paths) if paths else "No files in the standard LeRobot calibration directory.")
             print("Select the known working file for each physical arm; files are not selected automatically.")
+        elif args.command == "camera-check":
+            from .camera_check import camera_check
+            result = camera_check(root, args.duration)
+            return 0 if result["capture_check_passed"] else 1
         elif args.command == "calibration-import":
             print(import_calibration(root, args.role, args.source, args.arm_id))
             print("Original preserved. Imported file has the expected schema; physical calibration is unverified.")
@@ -73,7 +79,7 @@ def main(argv=None):
             print(teleop_command(root, load_config(root), args.without_cameras))
             print("Printed only. Running this upstream command enables teleoperation; verify hardware first.", file=sys.stderr)
         return 0
-    except (ValueError, OSError, KeyError, TypeError) as error:
+    except (ValueError, OSError, KeyError, TypeError, RuntimeError) as error:
         print(f"Error: {error}", file=sys.stderr)
         return 2
 

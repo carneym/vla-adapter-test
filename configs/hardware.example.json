@@ -17,6 +17,8 @@
   "follower": {
     "type": "so101_follower",
     "id": "follower",
+    "max_relative_target": 5.0,
+    "disable_torque_on_disconnect": false,
     "port": null,
     "device_identity": null,
     "calibration_path": null

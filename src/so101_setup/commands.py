@@ -1,6 +1,7 @@
 """Build reviewable LeRobot commands; never execute them."""
 
 import json
+import math
 import shlex
 
 from .config import calibration_file, port_identity, validate_id
@@ -25,6 +26,17 @@ def teleop_command(root, config, without_cameras=False):
         ]
     if port_identity(ports[0]) == port_identity(ports[1]):
         raise ValueError("Leader and follower must use different ports.")
+    # This is a cap relative to measured position, not a velocity limit.
+    relative_target = config["follower"].get("max_relative_target", 5.0)
+    if type(relative_target) not in (int, float) or not math.isfinite(relative_target) or relative_target <= 0:
+        raise ValueError("Set follower.max_relative_target to a finite positive number.")
+    release = config["follower"].get("disable_torque_on_disconnect", False)
+    if type(release) is not bool:
+        raise ValueError("Set follower.disable_torque_on_disconnect to true or false.")
+    args += [
+        f"--robot.max_relative_target={float(relative_target)}",
+        f"--robot.disable_torque_on_disconnect={str(release).lower()}",
+    ]
     if not without_cameras:
         cameras = {}
         for camera in config["cameras"]:

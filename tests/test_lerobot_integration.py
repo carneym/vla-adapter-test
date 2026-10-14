@@ -25,6 +25,8 @@ class LeRobotIntegrationTests(unittest.TestCase):
         config = draccus.parse(config_class=TeleoperateConfig, args=args)
         self.assertEqual(set(config.robot.cameras), {"overhead", "wrist"})
         self.assertEqual(config.fps, 30)
+        self.assertEqual(config.robot.max_relative_target, 5.0)
+        self.assertFalse(config.robot.disable_torque_on_disconnect)
         self.assertEqual(config.robot.calibration_dir, fixture.root / "calibration/follower")
         self.assertEqual(config.teleop.calibration_dir, fixture.root / "calibration/leader")
         self.assertEqual(config.robot.port, "/dev/test-follower")

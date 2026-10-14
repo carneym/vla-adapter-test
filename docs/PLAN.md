@@ -1,6 +1,6 @@
 # Implementation and test plan
 
-Updated 2026-10-13. The portable Mac LeRobot environment and setup helpers are implemented; see [SETUP.md](SETUP.md). Hardware checks and the model pipeline below remain unverified/planned. Targets are initial engineering acceptance criteria, to be revised after hardware measurements.
+Updated 2026-10-14. The portable Mac LeRobot environment and setup helpers are implemented; see [SETUP.md](SETUP.md). The operator confirmed functioning teleoperation with a relative target limit of 5; see the [hardware report](../reports/2026-10-14-teleoperation.md) for remaining C2 checks. Camera timing and framing are checked separately before recording. The model pipeline below remains planned. Targets are initial engineering acceptance criteria, to be revised after hardware measurements.
 
 ## Architecture
 
@@ -28,7 +28,7 @@ The initial host is the M2 MacBook Air with 8 GB; the M4 Mac mini with 16 GB is 
 
 The interface will be command-line tools with short guided prompts and persistent settings. Raise-arm is the first learned task. Its sequence is **find arms → identify cameras → calibrate → verify movement → ready**. Reuse LeRobot's per-arm calibration. Daily startup should validate identity, calibration compatibility, camera health, and the start pose without requiring repeated range sweeps. Detailed behavior is in [CALIBRATION.md](CALIBRATION.md).
 
-Available today: `scripts/setup.sh`, `so101 init`, `doctor`, `ports`, `calibrations`, `calibration-import`, `configure`, and `teleop-command` (prints an upstream command; does not execute it). LeRobot's upstream control/recording tools are installed. Project-specific recording, training, and evaluation orchestration remain planned.
+Available today: `scripts/setup.sh`, `so101 init`, `doctor`, `ports`, `calibrations`, `calibration-import`, `configure`, `camera-check` (opens only configured cameras), and `teleop-command` (prints an upstream command; does not execute it). LeRobot's upstream control/recording tools are installed. Project-specific recording, training, and evaluation orchestration remain planned.
 
 ## C0 — Confirm the setup
 
@@ -45,6 +45,8 @@ Deliver: documented existing LeRobot environment and pinned revision, persistent
 Test: connect each arm independently to label its port; reconnect both; confirm the labels still identify the right devices. Capture 60 seconds from each camera and inspect visibility, frame rate, and timestamps. Keep motor movement disabled during discovery.
 
 Pass: both arms are uniquely identified; configured cameras maintain the chosen capture rate without unexplained gaps. Fix USB bandwidth, permissions, or mounting issues before recording data.
+
+2026-10-14 evidence: both camera streams passed the 60-second timing check at 640×480 / 30 fps; overhead framing remains open. See the [camera report](../reports/2026-10-14-cameras.md).
 
 ## C2 — Calibrate, teleoperate, and reconnect
 
