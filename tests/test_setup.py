@@ -5,7 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from so101_setup.commands import teleop_command
+from so101_setup.commands import record_command, teleop_command
 from so101_setup.config import (
     JOINTS, configure, import_calibration, initialize, load_config, validate_calibration,
 )
@@ -135,6 +135,25 @@ class SetupTests(unittest.TestCase):
         args = shlex.split(teleop_command(self.root, config, without_cameras=True))
         self.assertIn("--robot.max_relative_target=5.0", args)
         self.assertIn("--robot.disable_torque_on_disconnect=false", args)
+
+    def test_recording_refuses_existing_data_or_session_path_traversal(self):
+        dataset = self.root / "data/raise-arm-test"
+        dataset.mkdir(parents=True)
+        marker = dataset / "keep.txt"
+        marker.write_text("existing recording")
+        with self.assertRaisesRegex(ValueError, "already exists"):
+            record_command(self.root, load_config(self.root), "raise-arm-test")
+        self.assertEqual(marker.read_text(), "existing recording")
+        with self.assertRaises(ValueError):
+            record_command(self.root, load_config(self.root), "../outside")
+
+    def test_recording_requires_both_cameras_without_creating_dataset(self):
+        configure(self.root, leader_port="/dev/leader", follower_port="/dev/follower")
+        for role in ("leader", "follower"):
+            import_calibration(self.root, role, self.source)
+        with self.assertRaisesRegex(ValueError, "camera index"):
+            record_command(self.root, load_config(self.root), "raise-arm-test")
+        self.assertFalse((self.root / "data").exists())
 
 
 if __name__ == "__main__":

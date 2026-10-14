@@ -4,7 +4,7 @@ import argparse
 import json
 import sys
 
-from .commands import teleop_command
+from .commands import record_command, teleop_command
 from .config import configure, import_calibration, initialize, load_config, project_root
 from .diagnostics import calibration_candidates, inventory, software_check
 
@@ -35,6 +35,8 @@ def main(argv=None):
     settings.add_argument("--wrist-camera", type=int)
     command = commands.add_parser("teleop-command", help="Print a LeRobot command for review; never execute it")
     command.add_argument("--without-cameras", action="store_true")
+    recording = commands.add_parser("record-command", help="Print one local 15-second raise-arm recording command; never execute it")
+    recording.add_argument("--session", help="New dataset folder name; defaults to a UTC timestamp")
     args = parser.parse_args(argv)
     try:
         root = project_root()
@@ -84,6 +86,11 @@ def main(argv=None):
         elif args.command == "teleop-command":
             print(teleop_command(root, load_config(root), args.without_cameras))
             print("Printed only. Running this upstream command enables teleoperation; verify hardware first.", file=sys.stderr)
+        elif args.command == "record-command":
+            print(record_command(root, load_config(root), args.session))
+            print("Printed only. Stop camera previews and other arm-control processes before running it. "
+                  "This enables teleoperation and records one local 15-second test episode. "
+                  "Keep the test dataset out of training until reviewed; quitting can save a partial episode.", file=sys.stderr)
         return 0
     except (ValueError, OSError, KeyError, TypeError, RuntimeError) as error:
         print(f"Error: {error}", file=sys.stderr)

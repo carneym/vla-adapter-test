@@ -5,7 +5,7 @@ import shlex
 import unittest
 
 import test_setup
-from so101_setup.commands import teleop_command
+from so101_setup.commands import record_command, teleop_command
 from so101_setup.config import configure, import_calibration, load_config
 
 
@@ -32,3 +32,31 @@ class LeRobotIntegrationTests(unittest.TestCase):
         self.assertEqual(config.robot.port, "/dev/test-follower")
         self.assertEqual(config.teleop.port, "/dev/test-leader")
         self.assertTrue(config.robot.use_degrees and config.teleop.use_degrees)
+
+    def test_recording_command_uses_local_storage_and_bounded_episode(self):
+        import draccus
+        from lerobot.scripts.lerobot_record import RecordConfig
+
+        fixture = test_setup.SetupTests()
+        fixture.setUp()
+        self.addCleanup(fixture.doCleanups)
+        configure(fixture.root, leader_port="/dev/leader", follower_port="/dev/follower", overhead_camera=0, wrist_camera=1)
+        for role in ("leader", "follower"):
+            import_calibration(fixture.root, role, fixture.source)
+        args = shlex.split(record_command(fixture.root, load_config(fixture.root), "raise-arm-test"))[4:]
+        config = draccus.parse(config_class=RecordConfig, args=args)
+        self.assertEqual(set(config.robot.cameras), {"overhead", "wrist"})
+        self.assertEqual(config.robot.max_relative_target, 5.0)
+        self.assertFalse(config.robot.disable_torque_on_disconnect)
+        self.assertTrue(config.robot.use_degrees and config.teleop.use_degrees)
+        self.assertEqual(config.dataset.num_episodes, 1)
+        self.assertEqual(config.dataset.episode_time_s, 15)
+        self.assertEqual(config.dataset.fps, 30)
+        self.assertEqual(config.dataset.single_task, "Raise your arm.")
+        self.assertEqual(str(config.dataset.root), str(fixture.root / "data/raise-arm-test"))
+        self.assertFalse(config.dataset.push_to_hub)
+        self.assertFalse(config.resume)
+        self.assertTrue(config.dataset.streaming_encoding)
+        self.assertEqual(config.dataset.rgb_encoder.vcodec, "h264")
+        config.dataset.stamp_repo_id()
+        self.assertEqual(config.dataset.repo_id, "local/raise-arm-test")

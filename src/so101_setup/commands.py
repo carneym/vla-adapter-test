@@ -3,12 +3,13 @@
 import json
 import math
 import shlex
+from datetime import datetime, timezone
 
 from .config import calibration_file, port_identity, validate_id
 
 
-def teleop_command(root, config, without_cameras=False):
-    args = ["uv", "run", "--locked", "lerobot-teleoperate", "--fps=30"]
+def _hardware_arguments(root, config, without_cameras=False):
+    args = []
     ports = []
     for role, prefix in (("follower", "robot"), ("leader", "teleop")):
         arm = config[role]
@@ -54,5 +55,47 @@ def teleop_command(root, config, without_cameras=False):
             raise ValueError("Configure exactly the overhead and wrist camera views.")
         if cameras["overhead"]["index_or_path"] == cameras["wrist"]["index_or_path"]:
             raise ValueError("The two camera indices must be different.")
-        args += [f"--robot.cameras={json.dumps(cameras)}", "--display_data=true"]
+        args += [f"--robot.cameras={json.dumps(cameras)}"]
+    return args
+
+
+def teleop_command(root, config, without_cameras=False):
+    args = ["uv", "run", "--locked", "lerobot-teleoperate", "--fps=30"]
+    args += _hardware_arguments(root, config, without_cameras)
+    if not without_cameras:
+        args += ["--display_data=true"]
+    return shlex.join(args)
+
+
+def record_command(root, config, session=None):
+    """Print one local commissioning episode, not an accepted training dataset."""
+    session = validate_id(session or datetime.now(timezone.utc).strftime("raise-arm-smoke-%Y%m%dT%H%M%SZ"))
+    destination = root / "data" / session
+    if destination.exists():
+        raise ValueError(f"Dataset already exists: {destination}. Choose another --session; existing data is preserved.")
+    args = ["uv", "run", "--locked", "lerobot-record"]
+    args += _hardware_arguments(root, config)
+    args += [
+        f"--dataset.repo_id=local/{session}",
+        f"--dataset.root={destination}",
+        "--dataset.no_stamp=true",
+        "--dataset.single_task=Raise your arm.",
+        "--dataset.fps=30",
+        "--dataset.num_episodes=1",
+        "--dataset.episode_time_s=15",
+        "--dataset.reset_time_s=10",
+        "--dataset.push_to_hub=false",
+        "--dataset.private=true",
+        "--dataset.video=true",
+        "--dataset.streaming_encoding=true",
+        "--dataset.encoder_threads=2",
+        "--dataset.encoder_queue_maxsize=30",
+        "--dataset.rgb_encoder.vcodec=h264",
+        "--dataset.rgb_encoder.preset=veryfast",
+        "--dataset.rgb_encoder.crf=23",
+        "--dataset.rgb_encoder.g=30",
+        "--resume=false",
+        "--display_data=false",
+        "--play_sounds=true",
+    ]
     return shlex.join(args)

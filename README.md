@@ -6,9 +6,11 @@ Repository: [carneym/vla-adapter-test](https://github.com/carneym/vla-adapter-te
 
 **Status: functioning teleoperation confirmed on the MacBook, with a 5° relative target limit.** Setup helpers, machine-local settings, calibration import, teleoperation command generation, and a simultaneous camera check are available. See the [teleoperation checkpoint](reports/2026-10-14-teleoperation.md) for evidence and remaining hardware checks. VLA-Adapter data conversion, training, and inference remain planned.
 
-Both cameras passed the 60-second capture timing test at 640×480 / 30 fps. Overhead framing still needs adjustment before demonstrations; see the [camera checkpoint](reports/2026-10-14-cameras.md).
+Both cameras passed the 60-second capture timing test at 640×480 / 30 fps, and the operator accepted the adjusted camera position. Next is a [single raise-arm recording test](docs/RECORDING.md) to check motion visibility and dataset output; see the [camera checkpoint](reports/2026-10-14-cameras.md).
 
 Use `uv run --locked so101 camera-preview` to position the overhead camera with a live browser view. It opens only that camera and does not record or control the arm.
+
+Use `uv run --locked so101 record-command` to print a local 15-second recording command with the saved hardware settings. Review the printed command before running it. This commissioning episode stays out of training until reviewed.
 
 ## Set up this Mac
 

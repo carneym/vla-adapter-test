@@ -92,7 +92,7 @@ uv run --locked so101 camera-check
 
 This opens only the two configured indices for 60 seconds through LeRobot, saves first/last previews and a JSON timing report under `.cache/camera-check/`, and closes the cameras. It never opens arm ports. The initial capture gate requires at least 95% of the requested frame rate per camera and no observed gap over 200 ms. Timing uses distinct host frame timestamps, so it is not a sensor synchronization test or an exact hardware dropped-frame count. Inspect framing separately: the overhead view should contain the follower's task workspace and the wrist view should show the gripper and nearby objects. A short `--duration=5` run is useful for preview but does not complete the 60-second checkpoint.
 
-The [first camera checkpoint](../reports/2026-10-14-cameras.md) measured 29.97 fps overhead and 30.02 fps wrist with both connected through the hub. Those measurements establish capture timing for that setup; overhead framing and throughput during demonstration recording still need verification.
+The [first camera checkpoint](../reports/2026-10-14-cameras.md) measured 29.97 fps overhead and 30.02 fps wrist with both connected through the hub. The operator subsequently accepted the adjusted placement. Visibility through the full task motion and throughput during demonstration recording still need verification.
 
 Generate the command:
 
@@ -109,6 +109,8 @@ The generated command runs at **30 Hz** and includes `--robot.max_relative_targe
 Press **Ctrl+C** in the terminal running teleoperation to stop command streaming. The generated command also includes `--robot.disable_torque_on_disconnect=false`, so the follower stays powered and holds its last target after a normal stop. This preserves the stop behavior used during initial testing. It does not release the arm, and failed communication or a crashed process is not a verified stop. See the [hardware checkpoint](../reports/2026-10-14-teleoperation.md) for completed checks and remaining verification.
 
 Pass: after a supervised test, both arms correspond correctly and both views are usable. The generated command is upstream teleoperation, not the planned autonomous controller/watchdog. The full C2 hardware checks in [PLAN.md](PLAN.md) still apply.
+
+For the next hardware test, see [First raise-arm recording](RECORDING.md). `uv run --locked so101 record-command` prints a command for one local 15-second episode using both cameras and the saved 5° relative target cap. It does not start recording or motor movement by itself.
 
 ## Move to the other Mac
 

@@ -46,7 +46,7 @@ Test: connect each arm independently to label its port; reconnect both; confirm 
 
 Pass: both arms are uniquely identified; configured cameras maintain the chosen capture rate without unexplained gaps. Fix USB bandwidth, permissions, or mounting issues before recording data.
 
-2026-10-14 evidence: both camera streams passed the 60-second timing check at 640×480 / 30 fps; overhead framing remains open. See the [camera report](../reports/2026-10-14-cameras.md).
+2026-10-14 evidence: both camera streams passed the 60-second timing check at 640×480 / 30 fps; the operator subsequently accepted the adjusted placement, and a reference preview was saved. Full-motion visibility is next. See the [camera report](../reports/2026-10-14-cameras.md).
 
 ## C2 — Calibrate, teleoperate, and reconnect
 
@@ -57,6 +57,8 @@ Test: back up and validate the existing calibration, running the manual calibrat
 Pass: all six channels have the right identity/direction; leader/follower tracking is consistent; no unexpected movement at startup; saved calibration works after reconnection. Record measured error, joint units, and the accepted threshold. Do not invent generic joint limits from normalized values.
 
 ## C3 — Five demonstrations and data inspection
+
+Available preparation: `so101 record-command` prints a bounded, local single-episode commissioning command. See [RECORDING.md](RECORDING.md). It does not implement acceptance/rejection, provenance capture, or the full C3 gate.
 
 Deliver: local recording with start/stop/retry, explicit task labels, synchronized frames/joints/actions, and visual review. Uploading is off by default.
 
@@ -73,6 +75,7 @@ Proposed data contract (must be checked against the chosen LeRobot revision):
 - Observation: RGB overhead image and wrist image, task text, and six follower position channels.
 - Channel order: shoulder pan, shoulder lift, elbow flex, wrist flex, wrist roll, gripper.
 - Action: the six commanded follower position targets recorded by teleoperation, with their timing relative to the observation stated explicitly.
+- Pinned-recorder finding: LeRobot 0.6.1 currently saves the leader's requested targets before the follower's relative target cap, not the `_sent_action` returned by `send_action`. Decide whether to train on desired or actual sent targets and keep inference consistent before accepting a training dataset. The commissioning command preserves upstream semantics; see [RECORDING.md](RECORDING.md#action-meaning-in-the-pinned-recorder).
 - Preserve the calibrated units and gripper convention in metadata; do not reinterpret values as Cartesian poses or raw servo ticks.
 - Set action dimension and proprioception dimension to six throughout the loader, action head, normalization, checkpoint, and inference path. Start with a short action chunk and choose its length from measured latency.
 - Compute normalization on the training split only. Store channel order, transforms, camera preprocessing, joint units, and normalization with every checkpoint.
