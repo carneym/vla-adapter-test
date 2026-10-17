@@ -153,7 +153,15 @@ For the initial test, the dataset ID is `local/raise-arm-c3_20261014_175556`. If
 
 Free several GB before starting (aim for at least 5 GB on this 8 GB Mac, including room for swap). A stock ACT policy is about 197 MiB, and its optimizer state needs roughly another 394 MiB. Jobs are saved by LeLab under `~/.cache/huggingface/lerobot/outputs/train/<job-id>/`, outside the repository. The model, configuration, and normalization files are in `run/checkpoints/<step>/pretrained_model/`; exact training resume also requires the complete `training_state/` directory. Transfer these privately if needed on another Mac.
 
-The [local ACT rerun](../reports/2026-10-14-act-smoke.md#successful-checkpoint-rerun) completed 50 updates, exited cleanly, and saved a complete checkpoint. Model, optimizer, RNG, and step restoration passed, plus offline prediction checks. Use the successful job ending `18-50-52`; the earlier job ending `18-26-58` has incomplete optimizer state from disk exhaustion. Fifty updates on five demonstrations establish that the training path works; they do not establish a reliable raise-arm policy. Keep **Run inference** unused until a separate supervised robot evaluation is prepared.
+The [local ACT rerun](../reports/2026-10-14-act-smoke.md#successful-checkpoint-rerun) completed 50 updates, exited cleanly, and saved a complete checkpoint. Model, optimizer, RNG, and step restoration passed, plus offline prediction checks. Use the successful job ending `18-50-52`; the earlier job ending `18-26-58` has incomplete optimizer state from disk exhaustion. Fifty updates on five demonstrations establish that the training path works; they do not establish a reliable raise-arm policy.
+
+## Supervised ACT test in standard LeLab
+
+From the successful training job, choose **step 50 → Run on robot**. Select **SO101**, set the first test to **5 seconds**, and bind `overhead` to **#0 Logi 4K Pro** and `wrist` to **#1 USB2.0_CAM1**, both at 640×480 and 0° rotation. Confirm these identities again if USB connections have changed. Put the follower in the demonstrated starting pose, clear the workspace, remain beside the power switch, then use **Start Inference**. LeLab provides **Stop** while the run is active.
+
+The project launcher uses LeLab's standard inference UI and upstream `lerobot_rollout` process. Because inference runs in a separate process, it passes native CLI flags for the saved calibration directory, degree units, 5° relative-target cap, hold-on-disconnect behavior, 30 Hz target rate, and no automatic return motion on exit. Both cameras receive the same five-second warmup used for collection. The relative-target cap bounds target error from the measured position; it is not a velocity limit. The follower stays powered at its last target after normal completion or Stop.
+
+The [first physical test](../reports/2026-10-17-act-inference.md) completed its five-second loop and exited cleanly. Setup took about 24 seconds before that timer began. Shoulder and wrist movement was measured, but no successful full raise was established. Two slow control updates were logged; this is not acceptance of sustained 30 Hz control or the full C5 watchdog/stop checks.
 
 ## Move to the other Mac
 

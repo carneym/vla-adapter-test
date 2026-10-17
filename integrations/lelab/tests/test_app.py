@@ -120,6 +120,25 @@ class LeLabIntegrationTests(unittest.TestCase):
                 runner="hf_cloud", flavor="a10g-small"))
             self.assertNotIn("--dataset.video_backend", cloud)
 
+    def test_inference_subprocess_receives_saved_arm_settings(self):
+        from lelab import rollout
+
+        policy = self.root / "act-checkpoint"
+        policy.mkdir()
+        (policy / "config.json").write_text('{"type": "act"}')
+        args = rollout._rollout_inference_args(str(policy))
+        self.assertIn("--robot.max_relative_target=5.0", args)
+        self.assertIn("--robot.disable_torque_on_disconnect=false", args)
+        self.assertIn("--robot.use_degrees=true", args)
+        self.assertIn(f"--robot.calibration_dir={self.root / 'calibration/follower'}", args)
+        self.assertIn("--return_to_initial_position=false", args)
+        cameras = {"overhead": {"type": "opencv", "camera_index": 0,
+                                "width": 640, "height": 480, "fps": 30}}
+        formatted = rollout._format_cameras_arg(cameras)
+        self.assertIn("warmup_s: 5", formatted)
+        self.assertIn("index_or_path: 0", formatted)
+        self.assertNotIn("warmup_s", cameras["overhead"])
+
     def test_record_reset_redo_loop_saves_real_dataset_with_fake_hardware(self):
         import av
         import numpy as np

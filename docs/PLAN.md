@@ -103,6 +103,8 @@ The example configuration records the budget only. Cost tracking and enforcement
 
 ## C5 — Inference feasibility and control checks
 
+2026-10-17 local ACT evidence: [one supervised five-second follower run](../reports/2026-10-17-act-inference.md) completed using standard LeLab inference with the saved 5° target cap. Motor readings confirm shoulder/wrist movement and clean post-run status. Two slow control updates occurred. This is initial integration evidence; the watchdog, sustained timing, deliberate stop tests, and reliable task execution remain open.
+
 Deliver: a shadow inference mode that reads recorded/live observations and logs proposed actions without moving the follower, plus a local command validator and watchdog.
 
 Test: benchmark Apple Silicon inference after replacing CUDA-only code where feasible; record numerical consistency with CUDA, memory, and p50/p95/p99 end-to-end latency. If it is unsuitable, evaluate remote Modal inference separately with warm/cold starts, timestamped requests, and network-drop tests. Internet access is available as a design assumption, but remote inference must pass these tests and stay within the remaining initial budget. Training on Modal does not settle the inference decision.

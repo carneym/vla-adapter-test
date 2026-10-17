@@ -156,6 +156,36 @@ def install_adapters(root, config):
 
     train.build_training_command = build_training_command
 
+    # LeLab inference launches upstream lerobot_rollout in a fresh process, so
+    # the in-process device adapters above do not apply. Pass native CLI flags.
+    from lelab import rollout
+
+    upstream_inference_args = rollout._rollout_inference_args
+    upstream_cameras_arg = rollout._format_cameras_arg
+
+    @wraps(upstream_inference_args)
+    def inference_args(policy_path):
+        follower = config["follower"]
+        return [
+            *upstream_inference_args(policy_path),
+            f"--robot.calibration_dir={calibration_file(root, config, 'follower').parent}",
+            "--robot.use_degrees=true",
+            f"--robot.max_relative_target={float(follower.get('max_relative_target', 5.0))}",
+            f"--robot.disable_torque_on_disconnect={str(follower.get('disable_torque_on_disconnect', False)).lower()}",
+            "--return_to_initial_position=false",
+            "--fps=30",
+        ]
+
+    @wraps(upstream_cameras_arg)
+    def inference_cameras_arg(cameras):
+        return upstream_cameras_arg({
+            name: {**camera, "warmup_s": CAMERA_WARMUP_S}
+            for name, camera in cameras.items()
+        })
+
+    rollout._rollout_inference_args = inference_args
+    rollout._format_cameras_arg = inference_cameras_arg
+
 
 def prepare(root):
     root = Path(root).resolve()
