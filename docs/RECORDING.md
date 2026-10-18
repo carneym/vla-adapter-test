@@ -4,7 +4,7 @@ Use [LeLab](https://github.com/huggingface/leLab) to collect repeated demonstrat
 
 ## Teach wave
 
-The recording form is prepared for `wave-c6`, task **`Wave.`**, **5 episodes**, **30 seconds per episode**, and **30 seconds per reset**. Use the existing `overhead` and `wrist` cameras at 640×480 and 30 fps, with streaming encoding enabled. The form does not create recordings until you click **Start Recording**; LeLab will append a session timestamp to the dataset name.
+The recording form is prepared for `wave-c6`, task **`Wave.`**, **5 episodes**, **30 seconds per episode**, and **15 seconds for initial setup and each reset**, as requested on 2026-10-18. Use the existing `overhead` and `wrist` cameras at 640×480 and 30 fps, with streaming encoding enabled. The form does not create recordings until you click **Start Recording**; LeLab will append a session timestamp to the dataset name.
 
 For this first batch, use the same lowered starting pose and repeat one consistent gesture:
 
