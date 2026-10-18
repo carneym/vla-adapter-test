@@ -115,6 +115,8 @@ Pass: measured latency supports a documented control rate and short execution ho
 
 ## C6 — First learned gestures
 
+Initial ACT evidence: on 2026-10-18, the operator confirmed the [first supervised five-second trial](../reports/2026-10-17-act-inference.md) worked very well and raised the arm to the top. Count this as one operator-assessed raise-arm success. Next, repeat the same setup three times from the demonstrated starting pose before expanding to the ten-attempt evaluation below. Wave, repeatability, and broader start-pose coverage remain open.
+
 Deliver: raise-arm policy, then wave policy, each with fixed instructions and taught targets. Recorded gestures may be used to verify hardware but do not count as learned-policy success as the user has confirmed both gestures must be learned.
 
 Data: begin with roughly 20–30 clean demonstrations per gesture, then add examples based on failures. These are collection starting points, not promised sample requirements.
