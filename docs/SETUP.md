@@ -161,7 +161,7 @@ From the successful training job, choose **step 50 → Run on robot**. Select **
 
 The project launcher uses LeLab's standard inference UI and upstream `lerobot_rollout` process. Because inference runs in a separate process, it passes native CLI flags for the saved calibration directory, degree units, 5° relative-target cap, hold-on-disconnect behavior, 30 Hz target rate, and no automatic return motion on exit. Both cameras receive the same five-second warmup used for collection. The relative-target cap bounds target error from the measured position; it is not a velocity limit. The follower stays powered at its last target after normal completion or Stop.
 
-The [first physical test](../reports/2026-10-17-act-inference.md) completed its five-second loop and exited cleanly. Setup took about 24 seconds before that timer began. The operator subsequently confirmed that it worked very well and raised the arm to the top. Repeatability remains untested. Two slow control updates were logged; this is not acceptance of sustained 30 Hz control or the full C5 watchdog/stop checks.
+The [first physical test](../reports/2026-10-17-act-inference.md) completed its five-second loop and exited cleanly. Setup took about 24 seconds before that timer began. The operator subsequently confirmed that it worked very well and raised the arm to the top, then reported success on all three requested repeats. The initial three-repeat check has passed; broader start-pose coverage remains untested. Two slow control updates were logged in the first run; this is not acceptance of sustained 30 Hz control or the full C5 watchdog/stop checks. Continue with the [separate wave recording session](RECORDING.md#teach-wave).
 
 ## Move to the other Mac
 

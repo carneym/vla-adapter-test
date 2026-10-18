@@ -1,6 +1,6 @@
 # First supervised ACT follower test — 2026-10-17
 
-**Result: first successful supervised raise-arm trial, assessed by the operator.** The five-second standard LeLab rollout exited normally. On 2026-10-18, the operator reported that it "worked very well, raising the arm to the top." This establishes one reported task success; repeatability remains untested.
+**Result: successful initial raise-arm trial and three successful repeats, assessed by the operator.** The first five-second standard LeLab rollout exited normally. On 2026-10-18, the operator reported that it "worked very well, raising the arm to the top," then confirmed that all three requested repeats worked. This records four operator-reported successes and passes the initial three-repeat check. Broader start-pose coverage and the full C5/C6 gates remain open.
 
 The user requested running the checkpoint, confirmed being beside the powered arm in its lowered starting pose with the workspace clear, and asked to use standard LeLab where possible. The test used the successful training job `act_local_raise-arm-c3_20261014_175556_2026-10-14_18-50-52`, checkpoint `000050`, trained for only 50 updates on the five local episodes.
 
@@ -42,4 +42,6 @@ The upstream rollout log is `~/.cache/huggingface/lerobot/inference_logs/1792253
 
 All 21 project tests and seven LeLab integration tests passed. The new integration check verifies the inference argument adapter, saved calibration path, motion settings, camera index translation, and warmup while leaving caller camera settings unchanged. The real rollout additionally exercised the generated flags through the upstream parser and hardware.
 
-Next: repeat the same five-second run three times under supervision, using the same checkpoint, cameras, 5° cap, and demonstrated starting pose. Reset through standard LeLab teleoperation between attempts and record whether each reaches the intended top position, any jerking, and any intervention. This is an initial repeatability check before the broader ten-attempt evaluation in C6. No additional hardware run was started when recording the 2026-10-18 feedback. No full C5/C6 acceptance is claimed.
+On 2026-10-18, the operator confirmed: "yes all three worked" and requested moving on to wave collection in LeLab. The requested repeat protocol used the same checkpoint, cameras, 5° cap, demonstrated starting pose, and teleoperated resets. No separate logs, trajectories, intervention counts, or timing measurements were inspected for these three repeats; their outcomes are operator reports. The measurements above remain evidence from the first run only.
+
+Next: collect five wave demonstrations using the [wave recording recipe](../docs/RECORDING.md#teach-wave), review them, then train and test a separate ACT wave checkpoint. Retain the working raise-arm policy. The broader ten-attempt evaluation in C6, stop/watchdog checks, and timing measurements remain open. No full C5/C6 acceptance is claimed.

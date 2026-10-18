@@ -115,7 +115,9 @@ Pass: measured latency supports a documented control rate and short execution ho
 
 ## C6 — First learned gestures
 
-Initial ACT evidence: on 2026-10-18, the operator confirmed the [first supervised five-second trial](../reports/2026-10-17-act-inference.md) worked very well and raised the arm to the top. Count this as one operator-assessed raise-arm success. Next, repeat the same setup three times from the demonstrated starting pose before expanding to the ten-attempt evaluation below. Wave, repeatability, and broader start-pose coverage remain open.
+Initial ACT evidence: on 2026-10-18, the operator confirmed the [first supervised five-second trial and all three requested repeats](../reports/2026-10-17-act-inference.md) worked. This passes the initial three-repeat check with four operator-reported successes overall; additional repeat telemetry was not inspected. Broader start-pose coverage and the ten-attempt evaluation below remain open.
+
+Next collection: a separate `wave-c6` session in standard LeLab, with five takes, 30-second recording allowances, and 30-second teleoperated resets. The [wave recipe](RECORDING.md#teach-wave) includes raising, three side-to-side cycles, and returning to rest. Review the saved episodes before a short local ACT run. The recording form is prepared; collection and wave training are not yet verified. Train a separate wave policy and retain the successful raise-arm checkpoint. Standard ACT does not select tasks from language instructions; combined instruction-based skills remain part of the VLA-Adapter path.
 
 Deliver: raise-arm policy, then wave policy, each with fixed instructions and taught targets. Recorded gestures may be used to verify hardware but do not count as learned-policy success as the user has confirmed both gestures must be learned.
 

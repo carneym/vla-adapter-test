@@ -1,8 +1,25 @@
 # Recording with reset loops
 
-Use [LeLab](https://github.com/huggingface/leLab) to collect repeated demonstrations in one session. Keep the accepted camera placement fixed and use the lower, bent-elbow raised pose that remains visible. Previous smoke recordings are commissioning evidence; the next checkpoint is five reviewed, clean raise-and-hold demonstrations.
+Use [LeLab](https://github.com/huggingface/leLab) to collect repeated demonstrations in one session. Keep the accepted camera placement fixed and the complete gesture visible. Five raise-arm episodes produced the first working local ACT checkpoint; the operator has reported a successful initial run and three successful repeats. The next collection checkpoint is five reviewed wave demonstrations in a separate dataset.
 
-## Start a session
+## Teach wave
+
+The recording form is prepared for `wave-c6`, task **`Wave.`**, **5 episodes**, **30 seconds per episode**, and **30 seconds per reset**. Use the existing `overhead` and `wrist` cameras at 640×480 and 30 fps, with streaming encoding enabled. The form does not create recordings until you click **Start Recording**; LeLab will append a session timestamp to the dataset name.
+
+For this first batch, use the same lowered starting pose and repeat one consistent gesture:
+
+1. Click **Start Recording** when ready. During the initial **Resetting** interval, use the leader to settle the follower into the lowered pose. Click **Start Next Episode** to begin.
+2. Raise to a comfortable pose that remains in the overhead view. Make **three gentle side-to-side cycles** with the leader, keeping the wave size and pace similar across takes and leaving slack in the wrist-camera cable.
+3. Return to the lowered rest pose and hold for about two seconds. Click **End Episode** to save the complete gesture before the recording timer expires.
+4. Use **Resetting** to prepare the next take. Use **Re-record** for an interrupted or incomplete gesture. Save five accepted takes.
+
+For wave, the return to rest is intentionally part of the learned gesture and belongs inside the recording. Extra repositioning between takes belongs in the reset interval. This is the initial teaching recipe; choose one consistent wave style rather than mixing different styles within this small batch.
+
+Checkpoints: review the first saved take for the full three-cycle gesture in the overhead view and a working wrist view; after five takes, inspect both video streams, episode boundaries, and state/action data. Then train a **separate local ACT wave policy**, starting with a short training/checkpoint check before a supervised rollout. Five takes and a short training run are a first test, not a guarantee of a successful wave. Add demonstrations or training based on the observed failures. Keep the successful raise-arm dataset and checkpoint available.
+
+The wave ACT run will use a fresh policy initialization with the standard pretrained vision backbone, not resume the raise-arm checkpoint. Standard ACT uses images and robot state, not the task text, to select actions. Simply mixing raise and wave demonstrations from the same starting scene does not provide a reliable way to select the gesture. For now, select each skill's checkpoint in LeLab. A combined model that selects skills from language instructions belongs to the planned VLA-Adapter work and will need demonstrations of both skills; fine-tuning only on the new task can degrade the old skill.
+
+## Raise-arm session reference
 
 1. Stop other teleoperation, recording, and camera-preview processes. Put the leader and follower in corresponding starting poses, with the workspace clear.
 2. From this checkout, run:
@@ -25,7 +42,7 @@ Use [LeLab](https://github.com/huggingface/leLab) to collect repeated demonstrat
 4. Check the two camera views, then start when ready. Starting the session connects the arms and enables teleoperation. LeLab first enters **Resetting**, with no frames saved. Use the leader to settle the follower into its starting pose. Click **Start Next Episode** when ready, or wait for the reset timer.
 5. During **Recording**, smoothly raise the arm and hold the final pose for about three seconds. Click **End Episode** to save the take before returning to rest. The session enters **Resetting** again, and you use the leader to return the follower to the starting pose. Repeat until five takes have been saved.
 
-The reset is a period of active teleoperation without recording. It does **not** automatically drive the arm to a stored home position. Return-to-rest movement belongs in this interval, outside the demonstration.
+The reset is a period of active teleoperation without recording. It does **not** automatically drive the arm to a stored home position. For raise-arm demonstrations, return-to-rest movement belongs in this interval, outside the demonstration.
 
 ## Controls
 
