@@ -147,6 +147,11 @@ def install_adapters(root, config):
     @wraps(upstream_training_command)
     def build_training_command(request, output_dir, python_executable="python", job_target=None):
         cmd = upstream_training_command(request, output_dir, python_executable, job_target)
+        # LeRobot's resume resolver reads sys.argv directly and only recognizes
+        # --config_path=VALUE, although draccus also accepts the split form.
+        if "--config_path" in cmd:
+            index = cmd.index("--config_path")
+            cmd[index:index + 2] = [f"--config_path={cmd[index + 1]}"]
         # The pinned LeRobot default detects TorchCodec's package, but does not
         # verify that its FFmpeg dylibs load on macOS. PyAV reads our H.264 files
         # without that system-library dependency. Cloud runners keep their default.
