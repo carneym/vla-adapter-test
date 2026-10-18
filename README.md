@@ -10,7 +10,7 @@ A [five-episode LeLab test](reports/2026-10-14-five-episode-test.md) completed s
 
 A [local ACT smoke test](reports/2026-10-14-act-smoke.md#successful-checkpoint-rerun) completed 50 updates on the MacBook's Apple GPU and saved a complete checkpoint. Model, optimizer, RNG, and step restoration passed, along with offline prediction checks. The operator confirmed success on the [first supervised follower test and all three requested repeats](reports/2026-10-17-act-inference.md) in standard LeLab. The initial three-repeat check has passed; broader start-pose coverage and the full evaluation gates remain open. Repeatable LeLab settings are in [Setup](docs/SETUP.md#short-local-act-training-in-lelab).
 
-The [wave ACT smoke run](reports/2026-10-18-wave-act-smoke.md) also completed: five new episodes (2,393 frames), 50 local MPS updates, and a complete checkpoint with offline restoration and prediction checks passed. Supervised wave-policy performance remains untested.
+The [wave ACT smoke run](reports/2026-10-18-wave-act-smoke.md) also completed: five new episodes (2,393 frames), 50 local MPS updates, and a complete checkpoint with offline restoration and prediction checks passed. Its first reported physical trial raised the arm but did not wave. Offline sequence checks show nearly constant predicted shoulder-pan targets; a longer local training run is the next proposed checkpoint.
 
 Use `uv run --locked so101 camera-preview` to position the overhead camera with a live browser view. It opens only that camera and does not record or control the arm.
 

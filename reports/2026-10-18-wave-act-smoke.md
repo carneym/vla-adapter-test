@@ -1,6 +1,6 @@
 # MacBook wave ACT smoke run — 2026-10-18
 
-**Result: all 50 updates completed and a complete checkpoint passed offline reload checks.** LeLab reports **done**, exit code **0**. The run took **43.6 seconds**, including initialization and saving. Wave-policy performance on the arm remains untested.
+**Training result: all 50 updates completed and a complete checkpoint passed offline reload checks. Physical result: the first reported trial raised the arm but did not wave.** LeLab reports training **done**, exit code **0**. The run took **43.6 seconds**, including initialization and saving. The sequence diagnostic below shows that the checkpoint predicts almost constant shoulder-pan targets during recorded wave observations.
 
 ## Dataset and camera recovery
 
@@ -46,4 +46,27 @@ The checkpoint contains **619,561,302 bytes** (about 591 MiB): model weights, po
 
 Verification strictly reloaded the saved model on MPS with its saved pre/postprocessors. Restoring training state returned step 50; all 153 optimizer parameter states were finite with step 50. RNG restoration passed; this ACT preset has no scheduler. A fresh offline prediction from the first frame of each episode returned finite `[1, 6]` actions. Every checkpoint file was hashed in `.cache/wave-act-complete-validation.json`; the full verification log is `.cache/wave-act-complete-validation.log`. No extra gradient update or physical rollout was performed during validation.
 
-Next checkpoint: a supervised wave-policy test through standard LeLab, followed by additional demonstrations or training based on the observed behavior. This run verifies the training/checkpoint pipeline and does not complete C6's physical success evaluation.
+## First physical trial and sequence diagnostic
+
+The operator reported: "it raised the arm but didn't do the waving motion." Count this as an unsuccessful wave trial, not a completed gesture.
+
+The matching rollout log, `~/.cache/huggingface/lerobot/inference_logs/1792333818.log`, confirms that the **wave** job's step-50 checkpoint was loaded on MPS. Both cameras connected, the control loop ran for its full **60-second** limit, and teardown finished normally with automatic return disabled. No camera timeout occurred. The missing wave cannot be attributed to selecting the raise-arm checkpoint or stopping before the demonstrated wave phase.
+
+The five demonstrations last 14.5–18.5 seconds. Substantial shoulder-pan motion (more than 8° from each episode's initial pan position) begins 4.6–6.7 seconds into the episodes. Recorded pan excursions span approximately 55–67° per episode. There are repeated direction changes in the recorded state and target data.
+
+An offline diagnostic supplied the model with 35 recorded observations: seconds 0, 3, 5, 7, 9, 11, and 13 from each episode. It predicted each 100-action chunk and applied the saved output normalization. For the 20 wave-phase observations at seconds 5, 7, 9, and 11:
+
+| Shoulder-pan measurement | Result |
+| --- | ---: |
+| Mean range within recorded target chunks | 58.14° |
+| Mean range within predicted chunks | 0.63° |
+| Mean absolute chunk prediction error | 16.90° |
+| First predicted pan target across these observations | −20.36° to −18.29° |
+
+The model predicts almost stationary pan targets even when given training-set observations from the wave. This is direct evidence that the 50-update checkpoint has not fitted the side-to-side sequence. It supports insufficient training as the next issue to address; it does not prove that more updates alone will solve phase ambiguity, demonstration variation, or closed-loop drift.
+
+The rollout also logged 79 target-clamp warnings and 18 slow iterations (1.4 Hz initially, then 6.1–7.6 Hz). These are individual iteration rates, not the mean control rate. The policy executes chunks of 100 actions, so periodic slow model refreshes need separate timing evaluation. Do not infer that the entire run operated at 7 Hz or remove the 5° target cap to compensate for an almost constant predicted trajectory.
+
+Local evidence: `.cache/wave-first-inference-summary.json`, `.cache/wave-act-sequence-diagnostic.json`, and `.cache/wave-act-sequence-diagnostic.log`. These checks use recorded training observations; they are not held-out evaluation or a simulated physical rollout. No new robot motion or training update was performed during diagnosis.
+
+Next proposed checkpoint: a local **1,000-update** wave run on the same data with batch size 1, MPS, workers 0, and checkpoints at 500 and 1,000. Based on the measured update time, budget roughly 6–8 minutes, not a guaranteed runtime. Compare predicted motion with the recorded sequence before another supervised arm trial. Add or refine demonstrations if a longer run still cannot reproduce the motion. This remains an incremental experiment; the [official ACT guide](https://huggingface.co/docs/lerobot/act) describes much longer training schedules. C6 remains open.

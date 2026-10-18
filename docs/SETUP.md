@@ -155,7 +155,7 @@ Free several GB before starting (aim for at least 5 GB on this 8 GB Mac, includi
 
 The [local ACT rerun](../reports/2026-10-14-act-smoke.md#successful-checkpoint-rerun) completed 50 updates, exited cleanly, and saved a complete checkpoint. Model, optimizer, RNG, and step restoration passed, plus offline prediction checks. Use the successful job ending `18-50-52`; the earlier job ending `18-26-58` has incomplete optimizer state from disk exhaustion. Fifty updates on five demonstrations establish that the training path works; they do not establish a reliable raise-arm policy.
 
-The same settings also completed a [separate wave smoke run](../reports/2026-10-18-wave-act-smoke.md) on dataset `local/wave-c6_20261018_150106`. Job `act_local_wave-c6_20261018_150106_2026-10-18_15-07-09`, step 50, has a complete checkpoint with offline restoration and prediction checks passed. Select this wave job for the next supervised wave test; the raise-arm job remains a separate skill. A physical wave-policy test has not yet been performed.
+The same settings also completed a [separate wave smoke run](../reports/2026-10-18-wave-act-smoke.md) on dataset `local/wave-c6_20261018_150106`. Job `act_local_wave-c6_20261018_150106_2026-10-18_15-07-09`, step 50, has a complete checkpoint with offline restoration and prediction checks passed. Its first reported physical trial raised the arm but did not wave, and offline sequence checks confirmed almost constant predicted pan targets. The next proposed training experiment uses 1,000 steps with save frequency 500; retain the other local settings above and compare predicted motion before another supervised rollout. The raise-arm job remains a separate skill.
 
 ## Supervised ACT test in standard LeLab
 

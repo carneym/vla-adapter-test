@@ -1,6 +1,6 @@
 # Recording with reset loops
 
-Use [LeLab](https://github.com/huggingface/leLab) to collect repeated demonstrations in one session. Keep the accepted camera placement fixed and the complete gesture visible. Five raise-arm episodes produced the first working local ACT checkpoint; the operator has reported a successful initial run and three successful repeats. A separate [five-episode wave session and 50-update local ACT run](../reports/2026-10-18-wave-act-smoke.md) have now completed; supervised wave-policy testing is next.
+Use [LeLab](https://github.com/huggingface/leLab) to collect repeated demonstrations in one session. Keep the accepted camera placement fixed and the complete gesture visible. Five raise-arm episodes produced the first working local ACT checkpoint; the operator has reported a successful initial run and three successful repeats. A separate [five-episode wave session and 50-update local ACT run](../reports/2026-10-18-wave-act-smoke.md) have now completed. The first physical wave test raised the arm but did not wave; further training and sequence checks are the next proposed step.
 
 ## Teach wave
 
