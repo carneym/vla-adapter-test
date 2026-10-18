@@ -31,7 +31,10 @@ def main():
     names = report['joint_names']
     units = report.get('joint_units', ['0–100 units' if n == 'gripper.pos' else 'degrees' for n in names])
     fps = report.get('fps', 30)
-    labels = args.labels or [f"{c['step']:,} updates" for c in checkpoints]
+    labels = args.labels or [
+        (f"Chunk {c['chunk_size']} · " if 'chunk_size' in c else '') + f"{c['step']:,} updates"
+        for c in checkpoints
+    ]
     if len(labels) != len(checkpoints):
         parser.error('Provide exactly one label per checkpoint.')
     if args.joint != 'all' and args.joint not in names:
@@ -83,7 +86,10 @@ def main():
         fig.legend(*axes.flat[0].get_legend_handles_labels(), loc='upper center',
                    bbox_to_anchor=(.5,.955), ncols=2, frameon=False)
         fig.tight_layout(rect=(0, .025, 1, .865))
-        fig.text(.5, .012, 'Recorded training observations · offline prediction, no arm motion',
+        footer = 'Recorded training observations · offline prediction, no arm motion'
+        if report.get('horizon_frames'):
+            footer += f" · first {report['horizon_frames']} targets compared"
+        fig.text(.5, .012, footer,
                  ha='center', fontsize=9, color='#50565e')
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(path, dpi=150, facecolor='white')

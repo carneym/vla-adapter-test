@@ -6,7 +6,7 @@ We can give a saved model a recorded observation and inspect the actions it prop
 
 For this model, one input contains the overhead RGB image, the wrist RGB image, and six measured joint positions at the same recorded moment. The saved preprocessor adds a batch dimension, normalizes those inputs, and moves them to the selected compute device.
 
-ACT predicts a tensor of shape **`[1, 100, 6]`**:
+The original ACT checkpoint predicts a tensor of shape **`[1, 100, 6]`**. A checkpoint trained with chunk size 30 instead produces **`[1, 30, 6]`**:
 
 | Dimension | Meaning |
 | --- | --- |
@@ -92,6 +92,14 @@ MPLCONFIGDIR=.cache/matplotlib uv run --no-project --python 3.12 --with matplotl
 Each plot starts from a fresh recorded observation. Black is the demonstrated future target; colored curves are model predictions. A flat predicted line means the model proposes holding approximately the same joint target over that chunk. The reported range is `max − min` within each chunk, averaged over the selected observations. It is not motor speed or the follower's separate 5° relative-target cap.
 
 Look at both **trajectory shape** and **error**: a large oscillation with the wrong timing can still fail. Useful questions include whether direction reversals occur at the right times, whether motion is too small, whether a particular joint dominates the error, and whether the model works across different observations rather than one convenient frame.
+
+## Compare different chunk sizes
+
+Add `--horizon-frames 30` to `check_act_wave.py` when comparing 30-action and 100-action policies. Both policies still generate their complete native chunks, but scoring and plotting use only the first 30 targets from each. Near the episode end, both are clipped to the remaining recorded targets. The checker rejects a horizon longer than any checkpoint's chunk size and verifies that decoded images are float32 RGB in [0, 1].
+
+This prevents a longer chunk from appearing to have better movement simply because it covers more time. Inspect error and direction against the same targets, at the same observations. Prediction ranges alone do not establish success. The output records each checkpoint's native `chunk_size`, `n_action_steps`, and endpoint pan change.
+
+The [chunk-30 experiment](../reports/2026-10-18-wave-act-chunk30.md) uses the same audited episode and a fresh model. Its portable training settings are in [`configs/training/wave-ep0-chunk30.json`](../configs/training/wave-ep0-chunk30.json).
 
 These are recorded training observations. They can expose failure to fit data, but a good fit does not prove success from new scenes or during a physical rollout, where the model's own actions change subsequent observations. This check also does not reveal a model's internal reasoning. It directly measures the output of its inference computation.
 

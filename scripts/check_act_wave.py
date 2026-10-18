@@ -20,9 +20,13 @@ def main():
     parser.add_argument("--device", choices=("mps", "cpu"), default="mps")
     parser.add_argument("--stride-frames", type=int,
                         help="Sample every N frames through each full episode instead of fixed times")
+    parser.add_argument("--horizon-frames", type=int,
+                        help="Compare only the first N targets, for matching different chunk sizes")
     args = parser.parse_args()
     if args.stride_frames is not None and args.stride_frames <= 0:
         parser.error('--stride-frames must be positive')
+    if args.horizon_frames is not None and args.horizon_frames <= 0:
+        parser.error('--horizon-frames must be positive')
 
     import numpy as np
     import pyarrow.parquet as pq
@@ -59,6 +63,7 @@ def main():
         "evaluation": "Recorded training observations, not held-out or closed-loop evaluation.",
         "protocol_seconds": [0, 3, 5, 7, 9, 11, 13] if args.stride_frames is None else None,
         "stride_frames": args.stride_frames,
+        "horizon_frames": args.horizon_frames,
         "wave_phase_seconds": [5, 7, 9, 11] if args.stride_frames is None else [5, 11],
         "wave_phase_selection": "fixed times" if args.stride_frames is None else "inclusive interval",
         "joint_names": names,
@@ -75,6 +80,8 @@ def main():
         pretrained = step_dir / "pretrained_model"
         expected_step = json.loads((step_dir / "training_state/training_step.json").read_text())["step"]
         config = PreTrainedConfig.from_pretrained(pretrained, local_files_only=True)
+        if args.horizon_frames is not None and args.horizon_frames > config.chunk_size:
+            raise ValueError('Comparison horizon exceeds a checkpoint\'s chunk size.')
         config.device = args.device
         config.pretrained_backbone_weights = None
         policy = ACTPolicy.from_pretrained(pretrained, config=config, local_files_only=True, strict=True)
@@ -112,6 +119,10 @@ def main():
                 if index >= end:
                     raise ValueError(f"Episode {ep['episode_index']} is too short for the fixed protocol")
                 sample = dataset[index]
+                for key in config.image_features:
+                    frame = sample[key]
+                    if frame.dtype != torch.float32 or not (0 <= frame.min() and frame.max() <= 1):
+                        raise ValueError('Expected decoded float32 RGB frames in [0, 1].')
                 policy.reset()
                 pre.reset()
                 post.reset()
@@ -121,7 +132,9 @@ def main():
                     )[0]).cpu().numpy()
                 if chunk.ndim != 2 or chunk.shape[1] != len(names) or not np.isfinite(chunk).all():
                     raise ValueError("Invalid action chunk")
-                n = min(len(chunk), end - index)
+                if len(chunk) != config.chunk_size:
+                    raise ValueError('Predicted chunk length differs from checkpoint configuration.')
+                n = min(len(chunk), end - index, args.horizon_frames or len(chunk))
                 true = actions[index:index + n]
                 checks.append({
                     "episode": ep["episode_index"], "seconds": sec, "index": index,
@@ -137,6 +150,8 @@ def main():
                     "joint_predictions": chunk[:n].tolist(),
                     "per_joint_target_range": np.ptp(true, axis=0).tolist(),
                     "per_joint_prediction_range": np.ptp(chunk[:n], axis=0).tolist(),
+                    "target_pan_delta_deg": float(true[-1, pan_index] - true[0, pan_index]),
+                    "predicted_pan_delta_deg": float(chunk[n-1, pan_index] - chunk[0, pan_index]),
                 })
         active = [c for c in checks if (5 <= c['seconds'] <= 11 if args.stride_frames is not None
                                        else c['seconds'] in result['wave_phase_seconds'])]
@@ -149,6 +164,7 @@ def main():
                                  "sha256": digest})
         entry = {
             "checkpoint": str(step_dir), "step": step, "device": str(next(policy.parameters()).device),
+            "chunk_size": config.chunk_size, "n_action_steps": config.n_action_steps,
             "sample_count": len(checks), "strict_weights_load": True,
             "optimizer_parameter_states": optimizer_count, "optimizer_steps": sorted(optimizer_steps),
             "optimizer_state_finite": True, "rng_restored": True,

@@ -72,3 +72,5 @@ Use the pinned LeLab Python, `.cache/lelab/venv/bin/python`. The new audit/prepa
 Local artifacts remain outside Git: `.cache/wave-target-audit.json`, `.cache/wave-ep0-preparation.json`, `.cache/wave-ep0-target-audit.json`, and `.cache/wave-ep0-pose-ambiguity.json`, with matching audit/preparation logs. Recordings and checkpoints are not uploaded.
 
 Final local evidence: `.cache/wave-ep0-all-joints.json`, `.cache/wave-ep0-all-joints.log`, `.cache/wave-ep0-all-joints.png`, the six `.cache/wave-ep0-<joint>.png` charts, and `.cache/inspect-act-example.log`.
+
+Follow-up: the [chunk-30 experiment](2026-10-18-wave-act-chunk30.md) completed later the same day and compares both horizons over matching 30-frame targets.
