@@ -1,10 +1,10 @@
 # Recording with reset loops
 
-Use [LeLab](https://github.com/huggingface/leLab) to collect repeated demonstrations in one session. Keep the accepted camera placement fixed and the complete gesture visible. Five raise-arm episodes produced the first working local ACT checkpoint; the operator has reported a successful initial run and three successful repeats. The next collection checkpoint is five reviewed wave demonstrations in a separate dataset.
+Use [LeLab](https://github.com/huggingface/leLab) to collect repeated demonstrations in one session. Keep the accepted camera placement fixed and the complete gesture visible. Five raise-arm episodes produced the first working local ACT checkpoint; the operator has reported a successful initial run and three successful repeats. A separate [five-episode wave session and 50-update local ACT run](../reports/2026-10-18-wave-act-smoke.md) have now completed; supervised wave-policy testing is next.
 
 ## Teach wave
 
-The recording form is prepared for `wave-c6`, task **`Wave.`**, **5 episodes**, **30 seconds per episode**, and **15 seconds for initial setup and each reset**, as requested on 2026-10-18. Use the existing `overhead` and `wrist` cameras at 640×480 and 30 fps, with streaming encoding enabled. The form does not create recordings until you click **Start Recording**; LeLab will append a session timestamp to the dataset name.
+For wave collection, use `wave-c6`, task **`Wave.`**, **5 episodes**, **30 seconds per episode**, and **15 seconds for initial setup and each reset**, as requested on 2026-10-18. Use the existing `overhead` and `wrist` cameras at 640×480 and 30 fps, with streaming encoding enabled. The form does not create recordings until you click **Start Recording**; LeLab will append a session timestamp to the dataset name.
 
 For this first batch, use the same lowered starting pose and repeat one consistent gesture:
 
@@ -71,7 +71,7 @@ A camera appearing in macOS or LeLab's device list does not prove it is deliveri
 
 Check camera indices again after changing USB connections. Keep previews and other camera applications closed while recording. If a fresh process also cannot capture frames, investigate the cable, hub/port, or camera rather than repeatedly extending timeouts. The 15-second setup/reset interval is separate from camera startup and frame-freshness checks. Model training reads the saved dataset and does not open these live cameras.
 
-On 2026-10-18, repeated overhead-camera startup timeouts occurred in the existing LeLab recording process. A separate camera-only check using the same LeLab environment captured both cameras simultaneously for 15 seconds: overhead 30.04 fps / 66.8 ms maximum observed gap; wrist 30.04 fps / 65.5 ms. Current identities still mapped to overhead index 0 and wrist index 1. The idle server was restarted to clear possible stale references. These results establish that fresh-process capture worked; a successful recording retry is still required to confirm recovery in LeLab.
+On 2026-10-18, repeated overhead-camera startup timeouts occurred in the existing LeLab recording process. A separate camera-only check using the same LeLab environment captured both cameras simultaneously for 15 seconds: overhead 30.04 fps / 66.8 ms maximum observed gap; wrist 30.04 fps / 65.5 ms. Current identities still mapped to overhead index 0 and wrist index 1. After restarting the idle server to clear possible stale references, `local/wave-c6_20261018_150106` completed five recordings with no camera timeout. Both videos decoded fully and matched the 2,393 state/action rows, confirming successful recording recovery for that session.
 
 New datasets are local at `data/lelab/<namespace>/<timestamped-name>/`, ignored by Git. LeLab appends timestamps to new session names, so there is no need to copy a fresh recording command. Recording starts with Hub upload disabled. Use **Datasets** to inspect completed takes and, when appropriate, **Record More Episodes** to append to a completed dataset. Existing CLI smoke recordings remain in their original `data/raise-arm-smoke-*` folders; they are not automatically imported into this browser.
 

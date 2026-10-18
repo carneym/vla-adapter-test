@@ -155,6 +155,8 @@ Free several GB before starting (aim for at least 5 GB on this 8 GB Mac, includi
 
 The [local ACT rerun](../reports/2026-10-14-act-smoke.md#successful-checkpoint-rerun) completed 50 updates, exited cleanly, and saved a complete checkpoint. Model, optimizer, RNG, and step restoration passed, plus offline prediction checks. Use the successful job ending `18-50-52`; the earlier job ending `18-26-58` has incomplete optimizer state from disk exhaustion. Fifty updates on five demonstrations establish that the training path works; they do not establish a reliable raise-arm policy.
 
+The same settings also completed a [separate wave smoke run](../reports/2026-10-18-wave-act-smoke.md) on dataset `local/wave-c6_20261018_150106`. Job `act_local_wave-c6_20261018_150106_2026-10-18_15-07-09`, step 50, has a complete checkpoint with offline restoration and prediction checks passed. Select this wave job for the next supervised wave test; the raise-arm job remains a separate skill. A physical wave-policy test has not yet been performed.
+
 ## Supervised ACT test in standard LeLab
 
 From the successful training job, choose **step 50 → Run on robot**. Select **SO101**, set the first test to **5 seconds**, and bind `overhead` to **#0 Logi 4K Pro** and `wrist` to **#1 USB2.0_CAM1**, both at 640×480 and 0° rotation. Confirm these identities again if USB connections have changed. Put the follower in the demonstrated starting pose, clear the workspace, remain beside the power switch, then use **Start Inference**. LeLab provides **Stop** while the run is active.
