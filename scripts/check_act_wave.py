@@ -18,7 +18,11 @@ def main():
     parser.add_argument("--repo-id", required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--device", choices=("mps", "cpu"), default="mps")
+    parser.add_argument("--stride-frames", type=int,
+                        help="Sample every N frames through each full episode instead of fixed times")
     args = parser.parse_args()
+    if args.stride_frames is not None and args.stride_frames <= 0:
+        parser.error('--stride-frames must be positive')
 
     import numpy as np
     import pyarrow.parquet as pq
@@ -53,9 +57,13 @@ def main():
     result = {
         "dataset": args.repo_id,
         "evaluation": "Recorded training observations, not held-out or closed-loop evaluation.",
-        "protocol_seconds": [0, 3, 5, 7, 9, 11, 13],
-        "wave_phase_seconds": [5, 7, 9, 11],
+        "protocol_seconds": [0, 3, 5, 7, 9, 11, 13] if args.stride_frames is None else None,
+        "stride_frames": args.stride_frames,
+        "wave_phase_seconds": [5, 7, 9, 11] if args.stride_frames is None else [5, 11],
+        "wave_phase_selection": "fixed times" if args.stride_frames is None else "inclusive interval",
         "joint_names": names,
+        "fps": info["fps"],
+        "joint_units": ["0–100 units" if name == "gripper.pos" else "degrees" for name in names],
         "robot_connected": False,
         "extra_training_updates": 0,
         "checkpoints": [],
@@ -87,14 +95,20 @@ def main():
             raise ValueError(f"Unexpected optimizer steps: {optimizer_steps}")
         optimizer_count = len(optimizer.state)
         del optimizer, scheduler
-        pre, post = make_pre_post_processors(config, pretrained_path=str(pretrained))
+        pre, post = make_pre_post_processors(config, pretrained_path=str(pretrained),
+            preprocessor_overrides={'device_processor': {'device': args.device}})
         checks = []
         for ep in episodes:
             start, end = ep["dataset_from_index"], ep["dataset_to_index"]
             if end - start != ep["length"] or ep["tasks"] != ["Wave."]:
                 raise ValueError("Unexpected wave episode metadata")
-            for sec in result["protocol_seconds"]:
-                index = start + sec * info["fps"]
+            if args.stride_frames is None:
+                offsets = [sec * info['fps'] for sec in result['protocol_seconds']]
+            else:
+                offsets = sorted(set([*range(0, end-start, args.stride_frames), end-start-1]))
+            for offset in offsets:
+                sec = offset / info['fps']
+                index = start + offset
                 if index >= end:
                     raise ValueError(f"Episode {ep['episode_index']} is too short for the fixed protocol")
                 sample = dataset[index]
@@ -119,8 +133,13 @@ def main():
                     "per_joint_chunk_mae": np.abs(chunk[:n] - true).mean(axis=0).tolist(),
                     "pan_target": true[:, pan_index].tolist(),
                     "pan_prediction": chunk[:n, pan_index].tolist(),
+                    "joint_targets": true.tolist(),
+                    "joint_predictions": chunk[:n].tolist(),
+                    "per_joint_target_range": np.ptp(true, axis=0).tolist(),
+                    "per_joint_prediction_range": np.ptp(chunk[:n], axis=0).tolist(),
                 })
-        active = [c for c in checks if c["seconds"] in result["wave_phase_seconds"]]
+        active = [c for c in checks if (5 <= c['seconds'] <= 11 if args.stride_frames is not None
+                                       else c['seconds'] in result['wave_phase_seconds'])]
         manifest = []
         for path in sorted(step_dir.rglob("*")):
             if path.is_file():
@@ -140,6 +159,8 @@ def main():
                 "mean_predicted_chunk_pan_range_deg": float(np.mean([c["predicted_pan_chunk_range_deg"] for c in active])),
                 "mean_recorded_chunk_pan_range_deg": float(np.mean([c["target_pan_chunk_range_deg"] for c in active])),
                 "per_joint_chunk_mae": np.mean([c["per_joint_chunk_mae"] for c in active], axis=0).tolist(),
+                "per_joint_target_range": np.mean([c["per_joint_target_range"] for c in active], axis=0).tolist(),
+                "per_joint_prediction_range": np.mean([c["per_joint_prediction_range"] for c in active], axis=0).tolist(),
             },
             "samples": checks, "files": manifest,
         }
